@@ -6,6 +6,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +19,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -29,12 +36,16 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,9 +55,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -54,37 +68,100 @@ import com.hninor.pruebamelidesign.core.designsystem.component.PageIndicator
 import com.hninor.pruebamelidesign.core.designsystem.theme.PriceColor
 import com.hninor.pruebamelidesign.core.designsystem.theme.DiscountColor
 import com.hninor.pruebamelidesign.domain.model.Product
+import com.hninor.pruebamelidesign.domain.model.Seller
+import com.hninor.pruebamelidesign.ui.home.mockProducts
+import com.hninor.pruebamelidesign.ui.home.ProductList
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.draw.clip
+import com.hninor.pruebamelidesign.R
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.runtime.DisposableEffect
 
-@OptIn(ExperimentalMaterial3Api::class)
+val recentSearchesMock = listOf("iphone", "samsung", "pelota", "notebook", "auriculares")
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun SearchScreen(
     navController: NavController,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     val snackbarHostState = remember { SnackbarHostState() }
-    
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let { error ->
-            snackbarHostState.showSnackbar(error)
-            viewModel.clearError()
-        }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusRequester = remember { FocusRequester() }
+
+    // Solicita el foco y muestra el teclado al entrar
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
     }
-    
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Mercado Libre") },
-                actions = {
-                    IconButton(onClick = { navController.navigate("settings") }) {
+            Column(
+                Modifier.background(Color(0xFFFFE600))
+            ) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp, bottom = 8.dp, start = 4.dp, end = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        navController.previousBackStackEntry?.savedStateHandle?.set("search_query", "")
+                        navController.popBackStack()
+                    }) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Configuración"
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = Color.Black
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 4.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Color.White),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            placeholder = { Text("Buscar en Mercado Libre", color = Color.Gray) },
+                            singleLine = true,
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Color.Black,
+                                unfocusedTextColor = Color.Black,
+                                cursorColor = Color.Black,
+                                focusedContainerColor = Color.White,
+                                unfocusedContainerColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .focusRequester(focusRequester),
+                            textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
+                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    navController.previousBackStackEntry?.savedStateHandle?.set("search_query", searchQuery.text)
+                                    keyboardController?.hide()
+                                    navController.popBackStack()
+                                }
+                            ),
+                            enabled = true,
+                            readOnly = false
                         )
                     }
                 }
-            )
+            }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
@@ -92,56 +169,32 @@ fun SearchScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
         ) {
-            // Campo de búsqueda
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { 
-                    searchQuery = it
-                    viewModel.searchProducts(it)
-                },
-                label = { Text("Buscar productos") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Buscar"
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Contenido principal
-            when {
-                uiState.isLoading -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
+            // Solo historial
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(top = 8.dp)
+            ) {
+                items(recentSearchesMock) { recent ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                navController.previousBackStackEntry?.savedStateHandle?.set("search_query", recent)
+                                keyboardController?.hide()
+                                navController.popBackStack()
+                            }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        CircularProgressIndicator()
-                    }
-                }
-                uiState.searchResult != null -> {
-                    SearchResults(
-                        products = uiState.searchResult!!.products,
-                        onProductClick = { product ->
-                            navController.navigate("product/${product.id}")
-                        }
-                    )
-                }
-                else -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Busca productos para comenzar",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Icon(
+                            imageVector = Icons.Default.History,
+                            contentDescription = null,
+                            tint = Color.Gray,
+                            modifier = Modifier.size(22.dp)
                         )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(recent, color = Color.Gray, fontSize = 18.sp)
                     }
                 }
             }

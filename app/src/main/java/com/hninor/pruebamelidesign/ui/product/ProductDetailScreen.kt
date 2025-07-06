@@ -2,6 +2,7 @@ package com.hninor.pruebamelidesign.ui.product
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +22,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -41,74 +49,299 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.core.designsystem.component.PageIndicator
 import com.hninor.pruebamelidesign.core.designsystem.theme.PriceColor
 import com.hninor.pruebamelidesign.core.designsystem.theme.DiscountColor
 import com.hninor.pruebamelidesign.core.designsystem.theme.RatingColor
+import com.hninor.pruebamelidesign.ui.home.mockProducts
+import androidx.compose.ui.graphics.Color
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ProductDetailScreen(
     navController: NavController,
-    viewModel: ProductDetailViewModel = hiltViewModel()
+    productId: String? = null
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    
-    LaunchedEffect(uiState.error) {
-        uiState.error?.let { error ->
-            snackbarHostState.showSnackbar(error)
-            viewModel.clearError()
-        }
-    }
-    
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Detalle del producto") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver"
-                        )
-                    }
+    // Buscar producto mock por id
+    val product = mockProducts.find { it.id == productId } ?: mockProducts.first()
+    val pagerImages = listOf(product.imageRes, product.imageRes, product.imageRes) // Mock 3 imágenes
+    val pagerState = rememberPagerState(pageCount = { pagerImages.size })
+    val yellow = Color(0xFFFFE600)
+    val blue = Color(0xFF23238E)
+    val green = Color(0xFF00A650)
+    val gray = Color(0xFF666666)
+    val lightGray = Color(0xFFF0F0F0)
+
+    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        // Barra superior amarilla
+        Column(Modifier.background(yellow)) {
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 8.dp, start = 4.dp, end = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Volver",
+                        tint = Color.Black
+                    )
                 }
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { paddingValues ->
-        when {
-            uiState.isLoading -> {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
-            uiState.product != null -> {
-                ProductDetailContent(
-                    product = uiState.product!!,
-                    modifier = Modifier.padding(paddingValues)
-                )
-            }
-            else -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color.White),
+                    contentAlignment = Alignment.CenterStart
                 ) {
                     Text(
-                        text = "Producto no encontrado",
-                        style = MaterialTheme.typography.bodyLarge
+                        text = "Buscar en Mercado Libre",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(start = 16.dp)
                     )
                 }
             }
+            // Dirección
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .background(yellow)
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = "Ubicación",
+                    tint = Color.Black,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Calle Bauness 1825", fontSize = 15.sp, color = Color.Black)
+                Spacer(modifier = Modifier.width(2.dp))
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowRight,
+                    contentDescription = "Cambiar dirección",
+                    tint = Color.Black,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+        // Contenido scrollable
+        Column(
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .background(Color.White)
+        ) {
+            // Estado, vendidos, rating
+            Row(
+                Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Nuevo", color = green, fontSize = 13.sp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("| 100 vendidos", color = gray, fontSize = 13.sp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "${product.rating}", fontSize = 13.sp, color = gray)
+                Spacer(modifier = Modifier.width(2.dp))
+                repeat(5) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_star),
+                        contentDescription = null,
+                        tint = Color(0xFFFFD700),
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("(${product.reviews})", fontSize = 12.sp, color = gray)
+            }
+            // Título
+            Text(
+                product.title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            // Etiqueta tienda oficial
+            if (product.isOfficial) {
+                Text(
+                    text = "APPLE TIENDA OFICIAL",
+                    color = Color.Black,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .background(lightGray, RoundedCornerShape(4.dp))
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                )
+            }
+            // Carrusel de imágenes
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(260.dp)
+                    .padding(vertical = 8.dp)
+            ) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    Image(
+                        painter = painterResource(id = pagerImages[page]),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+                // Indicador de página
+                Row(
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp)
+                        .background(Color.White, RoundedCornerShape(12.dp))
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("${pagerState.currentPage + 1}/${pagerImages.size}", fontSize = 12.sp, color = gray)
+                }
+                // Corazón favorito
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.FavoriteBorder,
+                        contentDescription = "Favorito",
+                        tint = Color.Gray,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
+            // Puntos de carrusel
+            Row(
+                Modifier.align(Alignment.CenterHorizontally).padding(bottom = 8.dp)
+            ) {
+                repeat(pagerImages.size) { idx ->
+                    Box(
+                        Modifier
+                            .size(if (pagerState.currentPage == idx) 10.dp else 8.dp)
+                            .background(
+                                if (pagerState.currentPage == idx) blue else lightGray,
+                                RoundedCornerShape(50)
+                            )
+                            .padding(2.dp)
+                    )
+                    if (idx < pagerImages.size - 1) Spacer(modifier = Modifier.width(4.dp))
+                }
+            }
+            // Precio y cuotas
+            Row(
+                Modifier.padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(product.price, fontWeight = FontWeight.Bold, fontSize = 32.sp, color = blue)
+                if (product.discount != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(product.discount, color = green, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+            if (product.originalPrice != null) {
+                Text(
+                    product.originalPrice,
+                    color = gray,
+                    fontSize = 15.sp,
+                    textDecoration = TextDecoration.LineThrough,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+            Text(
+                "Mismo precio en 9 cuotas de $ 127.999",
+                color = gray,
+                fontSize = 15.sp,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Text(
+                "Envío gratis el sábado",
+                color = green,
+                fontSize = 15.sp,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
+            )
+            // Stock
+            Text(
+                "Stock disponible",
+                color = gray,
+                fontSize = 15.sp,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
+            )
+            // Cantidad y botones
+            Row(
+                Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Cantidad: 1 (+10 disponibles)", color = gray, fontSize = 15.sp)
+            }
+            Button(
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = blue)
+            ) {
+                Text("Comprar ahora", color = Color.White, fontSize = 18.sp)
+            }
+            OutlinedButton(
+                onClick = {},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .height(48.dp)
+            ) {
+                Text("Agregar al carrito", color = blue, fontSize = 18.sp)
+            }
+            // Vendedor
+            Row(
+                Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = null,
+                    tint = Color.Gray,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text("Tienda oficial Apple", fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text("Vendido por MACSTATION OFICIAL", color = gray, fontSize = 13.sp)
+                    Text("+10mil ventas", color = gray, fontSize = 13.sp)
+                }
+            }
+            // Descripción
+            Text(
+                "Descripción",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            Text(
+                "El iPhone 14 viene con el sistema de dos cámaras más impresionante en un iPhone 14, para que tomes fotos espectaculares con mucha o poca luz. Y te da más tranquilidad gracias a una funcionalidad de seguridad que salva vidas.\n\nAviso legal\n(1) La pantalla tiene las esquinas redondeadas. Si se mide en forma de rectángulo, la pantalla tiene 6.06 pulgadas en diagonal. El área real de visualización es menor.\n(2) La funcionalidad Emergencia SOS usa conexión celular o llamadas por Wi-Fi.\n(3) La duración de la batería varía según el uso y la configuración.\n(4) Se requiere un plan de datos. SGs está disponible por regiones y a través de operadores seleccionados. La velocidad y la disponibilidad pueden variar según el lugar y el proveedor de servicios.\n(5) El iPhone 14 es resistente a las salpicaduras, al agua y al polvo; pruebas de laboratorio controladas, con una clasificación IP68 según la norma IEC 60529 (hasta 30 minutos a una profundidad máxima de 6 metros). La resistencia a las salpicaduras, al agua y al polvo no es una condición permanente, y podría disminuir como consecuencia del uso normal. No intentes cargar un iPhone mojado; consulta el manual del usuario para ver las instrucciones de limpieza y secado. La garantía no cubre daños producidos por líquidos.\n(6) Algunas funcionalidades podrían no estar disponibles en todos los países o áreas",
+                color = gray,
+                fontSize = 15.sp,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
+            )
         }
     }
 }

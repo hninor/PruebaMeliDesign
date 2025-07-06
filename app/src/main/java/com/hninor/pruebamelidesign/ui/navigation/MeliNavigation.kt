@@ -16,7 +16,7 @@ fun MeliNavigation(navController: NavHostController) {
         startDestination = "home"
     ) {
         composable("home") {
-            HomeScreen()
+            HomeScreen(navController = navController)
         }
         composable("search") {
             SearchScreen(navController = navController)

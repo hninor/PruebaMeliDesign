@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,10 +32,19 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.TextStyle
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.runtime.SideEffect
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.navigation.NavController
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.ui.platform.LocalLifecycleOwner
 
 // Datos mock para productos
 data class MockProduct(
@@ -87,25 +97,59 @@ val mockProducts = listOf(
 )
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     var isGrid by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     val systemUiController = rememberSystemUiController()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Recibe el término de búsqueda desde SearchScreen
+    LaunchedEffect(navController) {
+        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("search_query")?.observe(lifecycleOwner) { query ->
+            searchQuery = TextFieldValue(query)
+        }
+    }
+
     SideEffect {
         systemUiController.setStatusBarColor(Color(0xFFFFE600))
     }
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFFFE600))) {
-        TopBar(isGrid = isGrid, onToggleView = { isGrid = !isGrid })
+        TopBar(
+            isGrid = isGrid,
+            onToggleView = { isGrid = !isGrid },
+            searchQuery = searchQuery,
+            onSearchQueryChange = { searchQuery = it },
+            onSearchClick = { navController.navigate("search") },
+            onClearSearch = { searchQuery = TextFieldValue("") }
+        )
         FilterChips()
-        if (isGrid) {
-            ProductGrid(products = mockProducts)
-        } else {
-            ProductList(products = mockProducts)
+        val filteredProducts = if (searchQuery.text.isBlank()) mockProducts else mockProducts.filter {
+            it.title.contains(searchQuery.text, ignoreCase = true)
+        }
+        AnimatedContent(targetState = isGrid) { grid ->
+            if (grid) {
+                ProductGrid(products = filteredProducts, onProductClick = { product ->
+                    navController.navigate("product/${product.id}")
+                })
+            } else {
+                ProductList(products = filteredProducts, onProductClick = { product ->
+                    navController.navigate("product/${product.id}")
+                })
+            }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(isGrid: Boolean, onToggleView: (Boolean) -> Unit) {
+fun TopBar(
+    isGrid: Boolean,
+    onToggleView: (Boolean) -> Unit,
+    searchQuery: TextFieldValue,
+    onSearchQueryChange: (TextFieldValue) -> Unit,
+    onSearchClick: () -> Unit,
+    onClearSearch: () -> Unit
+) {
     // Barra de búsqueda y configuración
     Row(
         modifier = Modifier
@@ -117,16 +161,50 @@ fun TopBar(isGrid: Boolean, onToggleView: (Boolean) -> Unit) {
         Box(
             modifier = Modifier
                 .weight(1f)
-                .height(40.dp)
+                .padding(horizontal = 4.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(Color.White),
             contentAlignment = Alignment.CenterStart
         ) {
-            Text(
-                text = "Buscar...",
-                color = Color.Gray,
-                modifier = Modifier.padding(start = 16.dp)
+            TextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChange,
+                placeholder = { Text("Buscar...", color = Color.Gray) },
+                singleLine = true,
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    cursorColor = Color.Black,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
+                trailingIcon = {
+                    if (searchQuery.text.isNotBlank()) {
+                        IconButton(onClick = onClearSearch) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Limpiar búsqueda"
+                            )
+                        }
+                    }
+                },
+                readOnly = false,
+                enabled = true
             )
+            if (searchQuery.text.isBlank()) {
+                Box(
+                    Modifier
+                        .matchParentSize()
+                        .clickable { onSearchClick() }
+                ) { }
+            }
         }
         Spacer(modifier = Modifier.width(8.dp))
         // Botón de configuración arriba a la derecha
@@ -216,7 +294,7 @@ fun Chip(text: String) {
 }
 
 @Composable
-fun ProductList(products: List<MockProduct>) {
+fun ProductList(products: List<MockProduct>, onProductClick: (MockProduct) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -224,19 +302,20 @@ fun ProductList(products: List<MockProduct>) {
             .padding(top = 4.dp)
     ) {
         items(products) { product ->
-            ProductCard(product)
+            ProductCard(product, onClick = { onProductClick(product) })
         }
     }
 }
 
 @Composable
-fun ProductCard(product: MockProduct) {
+fun ProductCard(product: MockProduct, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(12.dp)
             .background(Color.White, RoundedCornerShape(12.dp))
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
@@ -307,7 +386,7 @@ fun ProductCard(product: MockProduct) {
 }
 
 @Composable
-fun ProductGrid(products: List<MockProduct>) {
+fun ProductGrid(products: List<MockProduct>, onProductClick: (MockProduct) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier
@@ -319,19 +398,20 @@ fun ProductGrid(products: List<MockProduct>) {
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(products.size) { idx ->
-            ProductGridCard(products[idx])
+            ProductGridCard(products[idx], onClick = { onProductClick(products[idx]) })
         }
     }
 }
 
 @Composable
-fun ProductGridCard(product: MockProduct) {
+fun ProductGridCard(product: MockProduct, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .background(Color.White, RoundedCornerShape(12.dp))
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(6.dp)
+            .clickable { onClick() }
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             Image(
