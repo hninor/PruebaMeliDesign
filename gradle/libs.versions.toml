@@ -22,6 +22,9 @@ datastore = "1.0.0"
 turbine = "1.0.0"
 mockk = "1.13.8"
 truth = "1.1.5"
+compose-material = "1.5.0"
+compose-material-icons-extended = "1.5.0"
+accompanist-systemuicontroller = "0.32.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -55,6 +58,9 @@ hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-com
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+compose-material = { module = "androidx.compose.material:material", version.ref = "compose-material" }
+compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose-material-icons-extended" }
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist-systemuicontroller" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

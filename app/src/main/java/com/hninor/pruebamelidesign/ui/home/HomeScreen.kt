@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,6 +22,19 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hninor.pruebamelidesign.R
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ViewModule
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import androidx.compose.runtime.SideEffect
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 
 // Datos mock para productos
 data class MockProduct(
@@ -76,15 +88,25 @@ val mockProducts = listOf(
 
 @Composable
 fun HomeScreen() {
+    var isGrid by remember { mutableStateOf(false) }
+    val systemUiController = rememberSystemUiController()
+    SideEffect {
+        systemUiController.setStatusBarColor(Color(0xFFFFE600))
+    }
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFFFE600))) {
-        TopBar()
+        TopBar(isGrid = isGrid, onToggleView = { isGrid = !isGrid })
         FilterChips()
-        ProductList(products = mockProducts)
+        if (isGrid) {
+            ProductGrid(products = mockProducts)
+        } else {
+            ProductList(products = mockProducts)
+        }
     }
 }
 
 @Composable
-fun TopBar() {
+fun TopBar(isGrid: Boolean, onToggleView: (Boolean) -> Unit) {
+    // Barra de búsqueda y configuración
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -92,15 +114,6 @@ fun TopBar() {
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Icono menú
-        Icon(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = "Menu",
-            tint = Color.Black,
-            modifier = Modifier.size(28.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        // Barra de búsqueda
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -116,41 +129,77 @@ fun TopBar() {
             )
         }
         Spacer(modifier = Modifier.width(8.dp))
-        // Icono notificaciones con badge
-        Box {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = "Notificaciones",
-                tint = Color.Black,
-                modifier = Modifier.size(28.dp)
-            )
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 10.dp, y = (-4).dp)
-                    .size(18.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF23238E)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("286", color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-            }
-        }
+        // Botón de configuración arriba a la derecha
+        Icon(
+            imageVector = Icons.Default.Settings,
+            contentDescription = "Configuración",
+            tint = Color.Black,
+            modifier = Modifier.size(28.dp)
+        )
+    }
+    // Segunda fila: dirección y botones de vista
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFFFE600))
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = Icons.Default.LocationOn,
+            contentDescription = "Ubicación",
+            tint = Color.Black,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text("Calle Posta 4789", fontSize = 15.sp, color = Color.Black)
+        Spacer(modifier = Modifier.width(2.dp))
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = "Cambiar dirección",
+            tint = Color.Black,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        // Botón de lista
+        Icon(
+            imageVector = Icons.Default.List,
+            contentDescription = "Vista de lista",
+            tint = if (!isGrid) Color(0xFF23238E) else Color.Black,
+            modifier = Modifier
+                .size(28.dp)
+                .clickable { onToggleView(false) }
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        // Botón de grilla
+        Icon(
+            imageVector = Icons.Filled.ViewModule,
+            contentDescription = "Vista de grilla",
+            tint = if (isGrid) Color(0xFF23238E) else Color.Black,
+            modifier = Modifier
+                .size(28.dp)
+                .clickable { onToggleView(true) }
+        )
     }
 }
 
 @Composable
 fun FilterChips() {
+    val scrollState = rememberScrollState()
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
+            .horizontalScroll(scrollState)
             .padding(vertical = 8.dp, horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Chip(text = "Llega mañana")
         Chip(text = "Mejor precio en cuotas")
         Chip(text = "Enviado por")
+        Chip(text = "Disponible en 3 colores")
+        Chip(text = "Apple Tienda Oficial")
+        Chip(text = "Envío gratis")
     }
 }
 
@@ -230,7 +279,7 @@ fun ProductCard(product: MockProduct) {
                 Spacer(modifier = Modifier.width(2.dp))
                 repeat(5) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        painter = painterResource(id = R.drawable.ic_star),
                         contentDescription = null,
                         tint = Color(0xFFFFD700),
                         modifier = Modifier.size(13.dp)
@@ -254,5 +303,111 @@ fun ProductCard(product: MockProduct) {
             tint = Color.Gray,
             modifier = Modifier.size(24.dp)
         )
+    }
+}
+
+@Composable
+fun ProductGrid(products: List<MockProduct>) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .padding(top = 4.dp),
+        contentPadding = PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items(products.size) { idx ->
+            ProductGridCard(products[idx])
+        }
+    }
+}
+
+@Composable
+fun ProductGridCard(product: MockProduct) {
+    Column(
+        modifier = Modifier
+            .background(Color.White, RoundedCornerShape(12.dp))
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(6.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Image(
+                painter = painterResource(id = product.imageRes),
+                contentDescription = product.title,
+                modifier = Modifier
+                    .height(140.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.ic_star), // Usa un corazón si tienes, si no, deja ic_star
+                contentDescription = "Favorito",
+                tint = Color.Gray,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(6.dp)
+                    .size(22.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            product.brand.uppercase(),
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            color = Color.Gray,
+            maxLines = 1
+        )
+        Text(
+            product.title,
+            fontWeight = FontWeight.Normal,
+            fontSize = 13.sp,
+            maxLines = 2
+        )
+        Spacer(modifier = Modifier.height(2.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                product.price,
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp,
+                color = Color(0xFF23238E)
+            )
+            if (product.discount != null) {
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    product.discount,
+                    color = Color(0xFF00A650),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+        if (product.originalPrice != null) {
+            Text(
+                product.originalPrice,
+                color = Color.Gray,
+                fontSize = 12.sp,
+                textDecoration = TextDecoration.LineThrough
+            )
+        }
+        if (product.freeShipping) {
+            Text(
+                "Envío gratis",
+                color = Color(0xFF00A650),
+                fontSize = 13.sp,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+        if (product.arrivesTomorrow) {
+            Text(
+                "Llega gratis mañana",
+                color = Color(0xFF00A650),
+                fontSize = 13.sp,
+                modifier = Modifier.padding(top = 2.dp)
+            )
+        }
+        // Puedes agregar más etiquetas si lo deseas
     }
 } 
