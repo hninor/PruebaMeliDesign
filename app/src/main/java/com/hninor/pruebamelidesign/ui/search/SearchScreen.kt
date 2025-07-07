@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.NorthEast
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -62,10 +63,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.TextRange
 import coil.compose.AsyncImage
 import com.hninor.pruebamelidesign.core.designsystem.theme.PriceColor
 import com.hninor.pruebamelidesign.core.designsystem.theme.DiscountColor
 import com.hninor.pruebamelidesign.domain.model.Product
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.ui.text.input.TextFieldValue
+
+val defaultSuggestions = listOf(
+    "iphone", "samsung", "notebook", "auriculares", "playstation", "xiaomi", "monitor", "teclado", "mouse", "impresora"
+)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -73,7 +81,15 @@ fun SearchScreen(
     navController: NavController,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+    val initialQuery = navController.previousBackStackEntry?.savedStateHandle?.get<String>("search_query") ?: ""
+    var searchQuery by remember {
+        mutableStateOf(
+            if (initialQuery.isNotEmpty())
+                TextFieldValue(initialQuery, TextRange(initialQuery.length))
+            else
+                TextFieldValue("")
+        )
+    }
     val snackbarHostState = remember { SnackbarHostState() }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
@@ -85,9 +101,16 @@ fun SearchScreen(
         focusRequester.requestFocus()
     }
 
+    // Si cambia el parámetro inicial, actualiza el campo y el cursor
+    LaunchedEffect(initialQuery) {
+        if (initialQuery != searchQuery.text) {
+            searchQuery = TextFieldValue(initialQuery, TextRange(initialQuery.length))
+        }
+    }
+
     // Búsqueda en tiempo real
-    LaunchedEffect(searchQuery) {
-        viewModel.searchProducts(searchQuery)
+    LaunchedEffect(searchQuery.text) {
+        viewModel.searchProducts(searchQuery.text)
     }
 
     fun addRecentSearch(query: String) {
@@ -105,9 +128,10 @@ fun SearchScreen(
     }
 
     Scaffold(
+        containerColor = Color.White,
         topBar = {
             Column(
-                Modifier.background(Color(0xFFFFE600))
+                Modifier.background(Color.White)
             ) {
                 Row(
                     Modifier
@@ -155,18 +179,18 @@ fun SearchScreen(
                             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
                             keyboardActions = KeyboardActions(
                                 onSearch = {
-                                    if (searchQuery.isNotBlank()) {
-                                        triggerSearch(searchQuery)
+                                    if (searchQuery.text.isNotBlank()) {
+                                        triggerSearch(searchQuery.text)
                                     }
                                 }
                             ),
                             enabled = true,
                             readOnly = false,
                             trailingIcon = {
-                                if (searchQuery.isNotBlank()) {
-                                    IconButton(onClick = { searchQuery = "" }) {
+                                if (searchQuery.text.isNotBlank()) {
+                                    IconButton(onClick = { searchQuery = TextFieldValue("", TextRange(0)) }) {
                                         Icon(
-                                            imageVector = Icons.Default.NorthEast, // Usar icono de limpiar si prefieres
+                                            imageVector = Icons.Default.Close,
                                             contentDescription = "Limpiar búsqueda"
                                         )
                                     }
@@ -175,6 +199,7 @@ fun SearchScreen(
                         )
                     }
                 }
+                Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -193,40 +218,31 @@ fun SearchScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    // Sugerencias de productos
-                    if (searchQuery.isNotBlank() && uiState.searchResults.isNotEmpty()) {
+                    // Sugerencias de productos (coincidencias)
+                    if (searchQuery.text.isNotBlank() && uiState.searchResults.isNotEmpty()) {
                         items(uiState.searchResults) { product ->
                             SuggestionRow(
                                 text = product.title,
-                                iconLeft = null,
+                                iconLeft = Icons.Default.History,
                                 iconRight = Icons.Default.NorthEast,
                                 onClick = { triggerSearch(product.title) },
-                                onIconRightClick = { searchQuery = product.title }
+                                onIconRightClick = { searchQuery = TextFieldValue(product.title, TextRange(product.title.length)) }
                             )
                             Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
                         }
                     }
-                    // Búsquedas recientes
-                    if (searchQuery.isBlank() || uiState.searchResults.isEmpty()) {
-                        if (recentSearches.isNotEmpty()) {
-                            items(recentSearches) { recent ->
-                                SuggestionRow(
-                                    text = recent,
-                                    iconLeft = Icons.Default.History,
-                                    iconRight = Icons.Default.NorthEast,
-                                    onClick = { triggerSearch(recent) },
-                                    onIconRightClick = { searchQuery = recent }
-                                )
-                                Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
-                            }
-                        } else {
-                            item {
-                                Text(
-                                    text = "Sin búsquedas recientes",
-                                    modifier = Modifier.padding(24.dp),
-                                    color = Color.Gray
-                                )
-                            }
+                    // Sugerencias por defecto o búsquedas recientes
+                    if (searchQuery.text.isBlank() || uiState.searchResults.isEmpty()) {
+                        val suggestions = if (recentSearches.isEmpty()) defaultSuggestions else recentSearches
+                        items(suggestions) { suggestion ->
+                            SuggestionRow(
+                                text = suggestion,
+                                iconLeft = Icons.Default.History,
+                                iconRight = Icons.Default.NorthEast,
+                                onClick = { triggerSearch(suggestion) },
+                                onIconRightClick = { searchQuery = TextFieldValue(suggestion, TextRange(suggestion.length)) }
+                            )
+                            Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
                         }
                     }
                 }

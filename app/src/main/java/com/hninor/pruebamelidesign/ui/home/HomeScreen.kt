@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -53,15 +54,14 @@ import com.hninor.pruebamelidesign.domain.model.Product
 @Composable
 fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     var isGrid by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
+    var searchQuery by remember { mutableStateOf("") }
     val systemUiController = rememberSystemUiController()
     val lifecycleOwner = LocalLifecycleOwner.current
     val uiState by viewModel.uiState.collectAsState()
 
-    // Recibe el término de búsqueda desde SearchScreen
     LaunchedEffect(navController) {
         navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("search_query")?.observe(lifecycleOwner) { query ->
-            searchQuery = TextFieldValue(query)
+            searchQuery = query ?: ""
         }
     }
 
@@ -74,14 +74,19 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
             isGrid = isGrid,
             onToggleView = { isGrid = !isGrid },
             searchQuery = searchQuery,
-            onSearchQueryChange = { searchQuery = it },
-            onSearchClick = {
+            onSearchClick = { initialText ->
                 navController.navigate("search") {
                     popUpTo("home")
                     launchSingleTop = true
+                    if (!initialText.isNullOrBlank()) {
+                        navController.currentBackStackEntry?.savedStateHandle?.set("search_query", initialText)
+                    }
                 }
             },
-            onClearSearch = { searchQuery = TextFieldValue("") },
+            onClearSearch = {
+                searchQuery = ""
+                navController.currentBackStackEntry?.savedStateHandle?.remove<String>("search_query")
+            },
             onSettingsClick = {
                 navController.navigate("settings") {
                     popUpTo("home")
@@ -90,10 +95,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
             }
         )
         FilterChips()
-        
-        // Usar el filtro mejorado del ViewModel
-        val filteredProducts = viewModel.filterProducts(searchQuery.text)
-        
+        val filteredProducts = viewModel.filterProducts(searchQuery)
         AnimatedContent(targetState = isGrid) { grid ->
             if (grid) {
                 ProductGrid(products = filteredProducts, onProductClick = { product ->
@@ -119,13 +121,11 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
 fun TopBar(
     isGrid: Boolean,
     onToggleView: (Boolean) -> Unit,
-    searchQuery: TextFieldValue,
-    onSearchQueryChange: (TextFieldValue) -> Unit,
-    onSearchClick: () -> Unit,
-    onClearSearch: () -> Unit,
+    searchQuery: String,
+    onSearchClick: (String?) -> Unit,
+    onClearSearch: () -> Unit = {},
     onSettingsClick: (() -> Unit)? = null
 ) {
-    // Barra de búsqueda y configuración
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -133,56 +133,35 @@ fun TopBar(
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (searchQuery.isNotBlank()) {
+            IconButton(onClick = { onClearSearch() }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Limpiar búsqueda",
+                    tint = Color.Black
+                )
+            }
+        }
         Box(
             modifier = Modifier
                 .weight(1f)
                 .padding(horizontal = 4.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color.White),
+                .background(Color.White)
+                .clickable {
+                    onSearchClick(if (searchQuery.isNotBlank()) searchQuery else null)
+                },
             contentAlignment = Alignment.CenterStart
         ) {
-            TextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChange,
-                placeholder = { Text("Buscar...", color = Color.Gray) },
-                singleLine = true,
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    unfocusedTextColor = Color.Black,
-                    cursorColor = Color.Black,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
-                ),
+            Text(
+                text = if (searchQuery.isBlank()) "Buscar..." else searchQuery,
+                color = if (searchQuery.isBlank()) Color.Gray else Color.Black,
+                fontSize = 16.sp,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
-                trailingIcon = {
-                    if (searchQuery.text.isNotBlank()) {
-                        IconButton(onClick = onClearSearch) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Limpiar búsqueda"
-                            )
-                        }
-                    }
-                },
-                readOnly = false,
-                enabled = true
+                    .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
             )
-            if (searchQuery.text.isBlank()) {
-                Box(
-                    Modifier
-                        .matchParentSize()
-                        .clickable { onSearchClick() }
-                ) { }
-            }
         }
         Spacer(modifier = Modifier.width(8.dp))
-        // Botón de configuración arriba a la derecha
         Icon(
             imageVector = Icons.Default.Settings,
             contentDescription = "Configuración",
@@ -192,7 +171,6 @@ fun TopBar(
                 .clickable { onSettingsClick?.invoke() }
         )
     }
-    // Segunda fila: dirección y botones de vista
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -204,37 +182,22 @@ fun TopBar(
             imageVector = Icons.Default.LocationOn,
             contentDescription = "Ubicación",
             tint = Color.Black,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(20.dp)
         )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text("Calle Posta 4789", fontSize = 15.sp, color = Color.Black)
-        Spacer(modifier = Modifier.width(2.dp))
-        Icon(
-            imageVector = Icons.Default.KeyboardArrowRight,
-            contentDescription = "Cambiar dirección",
-            tint = Color.Black,
-            modifier = Modifier.size(16.dp)
+        Text(
+            text = "Enviar a tu domicilio",
+            color = Color.Black,
+            fontSize = 14.sp,
+            modifier = Modifier.padding(start = 4.dp)
         )
         Spacer(modifier = Modifier.weight(1f))
-        // Botón de lista
-        Icon(
-            imageVector = Icons.Default.List,
-            contentDescription = "Vista de lista",
-            tint = if (!isGrid) Color(0xFF23238E) else Color.Black,
-            modifier = Modifier
-                .size(28.dp)
-                .clickable { onToggleView(false) }
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        // Botón de grilla
-        Icon(
-            imageVector = Icons.Filled.ViewModule,
-            contentDescription = "Vista de grilla",
-            tint = if (isGrid) Color(0xFF23238E) else Color.Black,
-            modifier = Modifier
-                .size(28.dp)
-                .clickable { onToggleView(true) }
-        )
+        IconButton(onClick = { onToggleView(!isGrid) }) {
+            Icon(
+                imageVector = if (isGrid) Icons.Default.List else Icons.Default.ViewModule,
+                contentDescription = if (isGrid) "Ver como lista" else "Ver como grilla",
+                tint = Color.Black
+            )
+        }
     }
 }
 
