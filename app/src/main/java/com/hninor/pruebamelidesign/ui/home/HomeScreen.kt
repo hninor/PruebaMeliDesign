@@ -44,64 +44,19 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.navigation.NavController
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalLifecycleOwner
-
-// Datos mock para productos
-data class MockProduct(
-    val id: String,
-    val title: String,
-    val brand: String,
-    val imageRes: Int,
-    val price: String,
-    val originalPrice: String?,
-    val discount: String?,
-    val rating: Double,
-    val reviews: Int,
-    val isOfficial: Boolean,
-    val freeShipping: Boolean,
-    val arrivesTomorrow: Boolean,
-    val colors: Int
-)
-
-val mockProducts = listOf(
-    MockProduct(
-        id = "1",
-        title = "Apple iPhone 13 (128 GB)-Blanco estelar - Distribuidor Autorizado",
-        brand = "Apple",
-        imageRes = R.drawable.ic_launcher_foreground, // Usa tu imagen real aquí
-        price = "$1.151.999",
-        originalPrice = "$2.399.999",
-        discount = "52% OFF",
-        rating = 4.9,
-        reviews = 38,
-        isOfficial = true,
-        freeShipping = true,
-        arrivesTomorrow = false,
-        colors = 3
-    ),
-    MockProduct(
-        id = "2",
-        title = "Apple iPhone 16 (256 GB)- Rosa",
-        brand = "Apple",
-        imageRes = R.drawable.ic_launcher_foreground,
-        price = "$2.125.000",
-        originalPrice = null,
-        discount = null,
-        rating = 4.9,
-        reviews = 269,
-        isOfficial = false,
-        freeShipping = true,
-        arrivesTomorrow = true,
-        colors = 5
-    )
-)
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.hninor.pruebamelidesign.domain.model.Product
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     var isGrid by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     val systemUiController = rememberSystemUiController()
     val lifecycleOwner = LocalLifecycleOwner.current
+    val uiState by viewModel.uiState.collectAsState()
 
     // Recibe el término de búsqueda desde SearchScreen
     LaunchedEffect(navController) {
@@ -113,27 +68,46 @@ fun HomeScreen(navController: NavController) {
     SideEffect {
         systemUiController.setStatusBarColor(Color(0xFFFFE600))
     }
+    
     Column(modifier = Modifier.fillMaxSize().background(Color(0xFFFFE600))) {
         TopBar(
             isGrid = isGrid,
             onToggleView = { isGrid = !isGrid },
             searchQuery = searchQuery,
             onSearchQueryChange = { searchQuery = it },
-            onSearchClick = { navController.navigate("search") },
-            onClearSearch = { searchQuery = TextFieldValue("") }
+            onSearchClick = {
+                navController.navigate("search") {
+                    popUpTo("home")
+                    launchSingleTop = true
+                }
+            },
+            onClearSearch = { searchQuery = TextFieldValue("") },
+            onSettingsClick = {
+                navController.navigate("settings") {
+                    popUpTo("home")
+                    launchSingleTop = true
+                }
+            }
         )
         FilterChips()
-        val filteredProducts = if (searchQuery.text.isBlank()) mockProducts else mockProducts.filter {
-            it.title.contains(searchQuery.text, ignoreCase = true)
-        }
+        
+        // Usar el filtro mejorado del ViewModel
+        val filteredProducts = viewModel.filterProducts(searchQuery.text)
+        
         AnimatedContent(targetState = isGrid) { grid ->
             if (grid) {
                 ProductGrid(products = filteredProducts, onProductClick = { product ->
-                    navController.navigate("product/${product.id}")
+                    navController.navigate("product/${product.id}") {
+                        popUpTo("home")
+                        launchSingleTop = true
+                    }
                 })
             } else {
                 ProductList(products = filteredProducts, onProductClick = { product ->
-                    navController.navigate("product/${product.id}")
+                    navController.navigate("product/${product.id}") {
+                        popUpTo("home")
+                        launchSingleTop = true
+                    }
                 })
             }
         }
@@ -148,7 +122,8 @@ fun TopBar(
     searchQuery: TextFieldValue,
     onSearchQueryChange: (TextFieldValue) -> Unit,
     onSearchClick: () -> Unit,
-    onClearSearch: () -> Unit
+    onClearSearch: () -> Unit,
+    onSettingsClick: (() -> Unit)? = null
 ) {
     // Barra de búsqueda y configuración
     Row(
@@ -212,7 +187,9 @@ fun TopBar(
             imageVector = Icons.Default.Settings,
             contentDescription = "Configuración",
             tint = Color.Black,
-            modifier = Modifier.size(28.dp)
+            modifier = Modifier
+                .size(28.dp)
+                .clickable { onSettingsClick?.invoke() }
         )
     }
     // Segunda fila: dirección y botones de vista
@@ -294,7 +271,7 @@ fun Chip(text: String) {
 }
 
 @Composable
-fun ProductList(products: List<MockProduct>, onProductClick: (MockProduct) -> Unit) {
+fun ProductList(products: List<Product>, onProductClick: (Product) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -308,7 +285,7 @@ fun ProductList(products: List<MockProduct>, onProductClick: (MockProduct) -> Un
 }
 
 @Composable
-fun ProductCard(product: MockProduct, onClick: () -> Unit) {
+fun ProductCard(product: Product, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -318,8 +295,8 @@ fun ProductCard(product: MockProduct, onClick: () -> Unit) {
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = painterResource(id = product.imageRes),
+        AsyncImage(
+            model = product.images.firstOrNull(),
             contentDescription = product.title,
             modifier = Modifier
                 .size(90.dp)
@@ -329,7 +306,7 @@ fun ProductCard(product: MockProduct, onClick: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             if (product.isOfficial) {
                 Text(
-                    text = "APPLE TIENDA OFICIAL",
+                    text = "${product.brand.uppercase()} TIENDA OFICIAL",
                     color = Color.Black,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
@@ -339,7 +316,7 @@ fun ProductCard(product: MockProduct, onClick: () -> Unit) {
             Text(product.brand, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             Text(product.title, fontSize = 14.sp, maxLines = 2)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(product.price, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF23238E))
+                Text("${product.price} ${product.currency}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF23238E))
                 if (product.discount != null) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(product.discount, color = Color(0xFF00A650), fontSize = 13.sp, fontWeight = FontWeight.Bold)
@@ -347,7 +324,7 @@ fun ProductCard(product: MockProduct, onClick: () -> Unit) {
             }
             if (product.originalPrice != null) {
                 Text(
-                    product.originalPrice,
+                    "${product.originalPrice} ${product.currency}",
                     color = Color.Gray,
                     fontSize = 13.sp,
                     textDecoration = TextDecoration.LineThrough
@@ -375,7 +352,7 @@ fun ProductCard(product: MockProduct, onClick: () -> Unit) {
             }
             Text("Disponible en ${product.colors} colores", fontSize = 12.sp, color = Color.Gray)
         }
-        // Corazón favorito
+        // Corazón favorito (decorativo)
         Icon(
             painter = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = "Favorito",
@@ -386,7 +363,7 @@ fun ProductCard(product: MockProduct, onClick: () -> Unit) {
 }
 
 @Composable
-fun ProductGrid(products: List<MockProduct>, onProductClick: (MockProduct) -> Unit) {
+fun ProductGrid(products: List<Product>, onProductClick: (Product) -> Unit) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier
@@ -404,7 +381,7 @@ fun ProductGrid(products: List<MockProduct>, onProductClick: (MockProduct) -> Un
 }
 
 @Composable
-fun ProductGridCard(product: MockProduct, onClick: () -> Unit) {
+fun ProductGridCard(product: Product, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .background(Color.White, RoundedCornerShape(12.dp))
@@ -414,8 +391,8 @@ fun ProductGridCard(product: MockProduct, onClick: () -> Unit) {
             .clickable { onClick() }
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(id = product.imageRes),
+            AsyncImage(
+                model = product.images.firstOrNull(),
                 contentDescription = product.title,
                 modifier = Modifier
                     .height(140.dp)
@@ -423,7 +400,7 @@ fun ProductGridCard(product: MockProduct, onClick: () -> Unit) {
                     .clip(RoundedCornerShape(8.dp))
             )
             Icon(
-                painter = painterResource(id = R.drawable.ic_star), // Usa un corazón si tienes, si no, deja ic_star
+                painter = painterResource(id = R.drawable.ic_star),
                 contentDescription = "Favorito",
                 tint = Color.Gray,
                 modifier = Modifier
@@ -433,23 +410,21 @@ fun ProductGridCard(product: MockProduct, onClick: () -> Unit) {
             )
         }
         Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            product.brand.uppercase(),
-            fontWeight = FontWeight.Bold,
-            fontSize = 12.sp,
-            color = Color.Gray,
-            maxLines = 1
-        )
-        Text(
-            product.title,
-            fontWeight = FontWeight.Normal,
-            fontSize = 13.sp,
-            maxLines = 2
-        )
+        if (product.isOfficial) {
+            Text(
+                text = "${product.brand.uppercase()} TIENDA OFICIAL",
+                color = Color.Black,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.background(Color(0xFFE0E0E0), RoundedCornerShape(4.dp)).padding(2.dp)
+            )
+        }
+        Text(product.brand, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color.Gray, maxLines = 1)
+        Text(product.title, fontWeight = FontWeight.Normal, fontSize = 13.sp, maxLines = 2)
         Spacer(modifier = Modifier.height(2.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                product.price,
+                "${product.price} ${product.currency}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 17.sp,
                 color = Color(0xFF23238E)
@@ -466,11 +441,25 @@ fun ProductGridCard(product: MockProduct, onClick: () -> Unit) {
         }
         if (product.originalPrice != null) {
             Text(
-                product.originalPrice,
+                "${product.originalPrice} ${product.currency}",
                 color = Color.Gray,
                 fontSize = 12.sp,
                 textDecoration = TextDecoration.LineThrough
             )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("${product.rating}", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.width(2.dp))
+            repeat(5) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_star),
+                    contentDescription = null,
+                    tint = Color(0xFFFFD700),
+                    modifier = Modifier.size(13.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("(${product.reviews})", fontSize = 12.sp, color = Color.Gray)
         }
         if (product.freeShipping) {
             Text(
@@ -488,6 +477,10 @@ fun ProductGridCard(product: MockProduct, onClick: () -> Unit) {
                 modifier = Modifier.padding(top = 2.dp)
             )
         }
-        // Puedes agregar más etiquetas si lo deseas
+        Text(
+            "Disponible en ${product.colors} colores",
+            fontSize = 12.sp,
+            color = Color.Gray
+        )
     }
 } 

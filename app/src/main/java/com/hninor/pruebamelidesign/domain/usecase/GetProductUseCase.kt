@@ -11,4 +11,12 @@ class GetProductUseCase @Inject constructor(
     operator fun invoke(id: String): Flow<Product> {
         return productRepository.getProductById(id)
     }
+}
+
+class GetProductsUseCase @Inject constructor(
+    private val productRepository: ProductRepository
+) {
+    operator fun invoke(): Flow<List<Product>> {
+        return productRepository.getProducts()
+    }
 } 

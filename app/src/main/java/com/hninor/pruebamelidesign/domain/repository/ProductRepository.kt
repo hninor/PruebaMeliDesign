@@ -7,4 +7,5 @@ import kotlinx.coroutines.flow.Flow
 interface ProductRepository {
     fun searchProducts(query: String): Flow<SearchResult>
     fun getProductById(id: String): Flow<Product>
+    fun getProducts(): Flow<List<Product>>
 } 

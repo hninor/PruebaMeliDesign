@@ -63,24 +63,43 @@ import com.hninor.pruebamelidesign.core.designsystem.component.PageIndicator
 import com.hninor.pruebamelidesign.core.designsystem.theme.PriceColor
 import com.hninor.pruebamelidesign.core.designsystem.theme.DiscountColor
 import com.hninor.pruebamelidesign.core.designsystem.theme.RatingColor
-import com.hninor.pruebamelidesign.ui.home.mockProducts
 import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ProductDetailScreen(
     navController: NavController,
-    productId: String? = null
+    productId: String? = null,
+    viewModel: ProductDetailViewModel = hiltViewModel()
 ) {
-    // Buscar producto mock por id
-    val product = mockProducts.find { it.id == productId } ?: mockProducts.first()
-    val pagerImages = listOf(product.imageRes, product.imageRes, product.imageRes) // Mock 3 imágenes
+    val uiState by viewModel.uiState.collectAsState()
+    val product = uiState.product
+    val pagerImages = product?.images ?: emptyList()
     val pagerState = rememberPagerState(pageCount = { pagerImages.size })
     val yellow = Color(0xFFFFE600)
     val blue = Color(0xFF23238E)
     val green = Color(0xFF00A650)
     val gray = Color(0xFF666666)
     val lightGray = Color(0xFFF0F0F0)
+
+    if (uiState.isLoading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+    if (uiState.error != null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Error: ${uiState.error}")
+        }
+        return
+    }
+    if (product == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Producto no encontrado")
+        }
+        return
+    }
 
     Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
         // Barra superior amarilla
@@ -91,7 +110,7 @@ fun ProductDetailScreen(
                     .padding(top = 8.dp, bottom = 8.dp, start = 4.dp, end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
                         contentDescription = "Volver",
@@ -145,27 +164,14 @@ fun ProductDetailScreen(
                 .verticalScroll(rememberScrollState())
                 .background(Color.White)
         ) {
-            // Estado, vendidos, rating
+            // Estado, vendidos
             Row(
                 Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Nuevo", color = green, fontSize = 13.sp)
+                Text(product.condition, color = green, fontSize = 13.sp)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("| 100 vendidos", color = gray, fontSize = 13.sp)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "${product.rating}", fontSize = 13.sp, color = gray)
-                Spacer(modifier = Modifier.width(2.dp))
-                repeat(5) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_star),
-                        contentDescription = null,
-                        tint = Color(0xFFFFD700),
-                        modifier = Modifier.size(13.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("(${product.reviews})", fontSize = 12.sp, color = gray)
+                Text("| ${product.soldQuantity} vendidos", color = gray, fontSize = 13.sp)
             }
             // Título
             Text(
@@ -198,8 +204,8 @@ fun ProductDetailScreen(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
-                    Image(
-                        painter = painterResource(id = pagerImages[page]),
+                    AsyncImage(
+                        model = pagerImages[page],
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit
@@ -251,15 +257,11 @@ fun ProductDetailScreen(
                 Modifier.padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.Bottom
             ) {
-                Text(product.price, fontWeight = FontWeight.Bold, fontSize = 32.sp, color = blue)
-                if (product.discount != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(product.discount, color = green, fontSize = 16.sp, fontWeight = FontWeight.Bold)
-                }
+                Text("${product.price} ${product.currency}", fontWeight = FontWeight.Bold, fontSize = 32.sp, color = blue)
             }
             if (product.originalPrice != null) {
                 Text(
-                    product.originalPrice,
+                    "${product.originalPrice} ${product.currency}",
                     color = gray,
                     fontSize = 15.sp,
                     textDecoration = TextDecoration.LineThrough,

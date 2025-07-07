@@ -2,7 +2,7 @@ package com.hninor.pruebamelidesign.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.hninor.pruebamelidesign.domain.model.SearchResult
+import com.hninor.pruebamelidesign.domain.model.Product
 import com.hninor.pruebamelidesign.domain.usecase.SearchProductsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +25,7 @@ class SearchViewModel @Inject constructor(
         if (query.isBlank()) {
             _uiState.update { it.copy(
                 isLoading = false,
-                searchResult = null,
+                searchResults = emptyList(),
                 error = null
             ) }
             return
@@ -44,7 +44,7 @@ class SearchViewModel @Inject constructor(
                 .collect { searchResult ->
                     _uiState.update { it.copy(
                         isLoading = false,
-                        searchResult = searchResult,
+                        searchResults = searchResult.products,
                         error = null
                     ) }
                 }
@@ -58,6 +58,6 @@ class SearchViewModel @Inject constructor(
 
 data class SearchUiState(
     val isLoading: Boolean = false,
-    val searchResult: SearchResult? = null,
+    val searchResults: List<Product> = emptyList(),
     val error: String? = null
 ) 
