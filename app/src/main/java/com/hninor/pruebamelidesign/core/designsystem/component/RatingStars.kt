@@ -26,7 +26,7 @@ fun RatingStars(
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = String.format("%.1f", rating),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.outline,
             fontSize = 13.sp
         )
         Spacer(modifier = Modifier.width(2.dp))
@@ -59,7 +59,7 @@ fun RatingStars(
         }
         if (reviews != null) {
             Spacer(modifier = Modifier.width(4.dp))
-            Text("($reviews)", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("($reviews)", fontSize = 12.sp, color = MaterialTheme.colorScheme.outline)
         }
     }
 } 

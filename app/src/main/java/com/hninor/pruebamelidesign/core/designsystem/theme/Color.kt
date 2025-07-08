@@ -12,6 +12,7 @@ val GreenML = Color(0xFF00A650)
 val RedML = Color(0xFFF23D4F)
 val VioletML = Color(0xFFA500FF)
 val OrangeML = Color(0xFFFF6F00)
+val MidGrayML = Color(0xFF888888) // Gris intermedio entre MediumGrayML y DarkGrayML
 
 // Colores base
 val Blue = BlueML
@@ -38,7 +39,7 @@ val OnError = Color(0xFFFFFFFF)
 // Colores de estado
 val SurfaceVariant = MediumGrayML
 val OnSurfaceVariant = DarkGrayML
-val Outline = MediumGrayML
+val Outline = MidGrayML
 val OutlineVariant = LightGrayML
 
 // Colores de producto

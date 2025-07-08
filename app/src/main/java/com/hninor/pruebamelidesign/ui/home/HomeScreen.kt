@@ -61,6 +61,7 @@ import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
 import com.hninor.pruebamelidesign.core.designsystem.component.MeliChip
 import com.hninor.pruebamelidesign.core.designsystem.component.RatingStars
+import com.hninor.pruebamelidesign.core.designsystem.theme.MidGrayML
 import com.hninor.pruebamelidesign.domain.model.Product
 import java.text.NumberFormat
 import java.util.Locale
@@ -218,7 +219,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
                 modifier = Modifier.align(Alignment.TopEnd)
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Favorite ,
+                    imageVector = Icons.Filled.Favorite,
                     contentDescription = null,
                     tint = if (isFavorite) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline,
                     modifier = Modifier.size(28.dp)
@@ -229,7 +230,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
         Column(modifier = Modifier.weight(1f)) {
             if (product.isOfficial) {
                 Text(
-                    text = "APPLE TIENDA OFICIAL",
+                    text = "${product.brand.uppercase()} TIENDA OFICIAL",
                     color = Color.White,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
@@ -255,16 +256,16 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Por ${product.brand}",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 12.sp
                 )
 
-                    Icon(
-                        imageVector = Icons.Filled.Verified,
-                        contentDescription = "Verificado",
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(12.dp)
-                    )
+                Icon(
+                    imageVector = Icons.Filled.Verified,
+                    contentDescription = "Verificado",
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(12.dp)
+                )
 
             }
             RatingStars(
@@ -275,7 +276,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
             if (product.originalPrice != null) {
                 Text(
                     text = formatCurrency(product.originalPrice),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 13.sp,
                     textDecoration = TextDecoration.LineThrough
                 )
@@ -293,7 +294,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
                         text = product.discount,
                         color = MaterialTheme.colorScheme.tertiary,
                         fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
+
                     )
                 }
             }
@@ -325,7 +326,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
             if (product.colors != null) {
                 Text(
                     text = "Disponible en ${product.colors} colores",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 12.sp
                 )
             }
@@ -353,9 +354,10 @@ fun ProductGrid(products: List<Product>, onProductClick: (Product) -> Unit) {
 
 @Composable
 fun ProductGridCard(product: Product, onClick: () -> Unit) {
+    var isFavorite by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
-            .background(Color.White, RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(6.dp)
@@ -368,98 +370,127 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
                 modifier = Modifier
                     .height(140.dp)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
             )
-            Icon(
-                painter = painterResource(id = R.drawable.ic_star),
-                contentDescription = "Favorito",
-                tint = Color.Gray,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(6.dp)
-                    .size(22.dp)
-            )
+            IconButton(
+                onClick = { isFavorite = !isFavorite },
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = null,
+                    tint = if (isFavorite) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.height(6.dp))
+
         if (product.isOfficial) {
             Text(
                 text = "${product.brand.uppercase()} TIENDA OFICIAL",
-                color = Color.Black,
+                color = Color.White,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
-                    .background(Color(0xFFE0E0E0), RoundedCornerShape(4.dp))
-                    .padding(2.dp)
+                    .background(Color.Black, RoundedCornerShape(3.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
             )
+            Spacer(modifier = Modifier.height(4.dp))
         }
+
         Text(
-            product.brand,
-            fontWeight = FontWeight.Bold,
+            text = product.brand.uppercase(),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 12.sp,
-            color = Color.Gray,
-            maxLines = 1
+            fontWeight = FontWeight.Bold
         )
-        Text(product.title, fontWeight = FontWeight.Normal, fontSize = 13.sp, maxLines = 2)
+        Text(
+            text = product.title,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 15.sp,
+            maxLines = 2
+        )
         Spacer(modifier = Modifier.height(2.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                "${product.price} ${product.currency}",
-                fontWeight = FontWeight.Bold,
-                fontSize = 17.sp,
-                color = MaterialTheme.colorScheme.secondary
+                text = "Por ${product.brand}",
+                color = MaterialTheme.colorScheme.outline,
+                fontSize = 12.sp
             )
-            if (product.discount != null) {
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    product.discount,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+
+            Icon(
+                imageVector = Icons.Filled.Verified,
+                contentDescription = "Verificado",
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(12.dp)
+            )
+
         }
+        RatingStars(
+            rating = product.rating,
+            reviews = product.reviews,
+            modifier = Modifier.padding(top = 2.dp)
+        )
         if (product.originalPrice != null) {
             Text(
-                "${product.originalPrice} ${product.currency}",
-                color = Color.Gray,
-                fontSize = 12.sp,
+                text = formatCurrency(product.originalPrice),
+                color = MaterialTheme.colorScheme.outline,
+                fontSize = 13.sp,
                 textDecoration = TextDecoration.LineThrough
             )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("${product.rating}", fontSize = 13.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.width(2.dp))
-            repeat(5) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_star),
-                    contentDescription = null,
-                    tint = Color(0xFFFFD700),
-                    modifier = Modifier.size(13.dp)
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(
+                text = formatCurrency(product.price),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+            if (product.discount != null) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = product.discount,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontSize = 13.sp,
+
                 )
             }
-            Spacer(modifier = Modifier.width(4.dp))
-            Text("(${product.reviews})", fontSize = 12.sp, color = Color.Gray)
         }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
         if (product.freeShipping) {
             Text(
-                "Envío gratis",
-                color = MaterialTheme.colorScheme.secondary,
-                fontSize = 13.sp,
-                modifier = Modifier.padding(top = 2.dp)
+                text = "Envío gratis",
+                color = MaterialTheme.colorScheme.tertiary,
+                fontSize = 13.sp
             )
         }
+        Spacer(modifier = Modifier.height(4.dp))
         if (product.arrivesTomorrow) {
             Text(
-                "Llega gratis mañana",
-                color = MaterialTheme.colorScheme.secondary,
+                text = "Llega gratis mañana",
+                color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 13.sp,
-                modifier = Modifier.padding(top = 2.dp)
+                modifier = Modifier
+                    .background(
+                        MaterialTheme.colorScheme.tertiaryContainer,
+                        RoundedCornerShape(4.dp)
+                    )
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
             )
         }
-        Text(
-            "Disponible en ${product.colors} colores",
-            fontSize = 12.sp,
-            color = Color.Gray
-        )
+        Spacer(modifier = Modifier.height(4.dp))
+        if (product.colors != null) {
+            Text(
+                text = "Disponible en ${product.colors} colores",
+                color = MaterialTheme.colorScheme.outline,
+                fontSize = 12.sp
+            )
+        }
+
+
     }
 } 
