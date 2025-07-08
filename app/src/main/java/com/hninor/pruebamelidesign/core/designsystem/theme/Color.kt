@@ -51,3 +51,6 @@ val SecondaryOrangeContainer = Color(0xFFFFF3E0) // Naranja claro
 val SecondaryVioletContainer = Color(0xFFF3E5F5) // Violeta claro
 val SecondaryGreenContainer = Color(0xFFE8F5E9)  // Verde claro
 val SecondaryDefaultContainer = Color(0xFFF5F5F5) // Por defecto 
+
+val TertiaryML = Color(0xFF00A650) // Verde Mercado Libre
+val TertiaryMLContainer = Color(0xFFE8F5E9) // Verde claro para fondo 

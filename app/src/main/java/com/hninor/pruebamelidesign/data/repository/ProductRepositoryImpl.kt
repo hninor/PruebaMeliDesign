@@ -1,5 +1,6 @@
 package com.hninor.pruebamelidesign.data.repository
 
+import com.hninor.pruebamelidesign.data.remote.MockProductService
 import com.hninor.pruebamelidesign.domain.model.Product
 import com.hninor.pruebamelidesign.domain.model.SearchResult
 import com.hninor.pruebamelidesign.domain.repository.ProductRepository
@@ -8,7 +9,7 @@ import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 class ProductRepositoryImpl @Inject constructor() : ProductRepository {
-    private val mockService = com.hninor.pruebamelidesign.data.remote.MockProductService()
+    private val mockService = MockProductService()
     override fun getProducts(): Flow<List<Product>> = flow {
         emit(mockService.getProducts())
     }
