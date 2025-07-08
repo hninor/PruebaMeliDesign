@@ -2,6 +2,7 @@ package com.hninor.pruebamelidesign.ui.product
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,6 +49,7 @@ import coil.compose.AsyncImage
 import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
 import com.hninor.pruebamelidesign.core.designsystem.component.PageIndicator
+import com.hninor.pruebamelidesign.core.designsystem.component.RatingStars
 import com.hninor.pruebamelidesign.ui.home.formatCurrency
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -111,19 +113,27 @@ fun ProductDetailScreen(
 
             Row(
                 Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    product.condition,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    fontSize = 13.sp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                val quantity = formatCurrency(product.soldQuantity, "")
-                Text(
-                    "| $quantity vendidos",
-                    color = MaterialTheme.colorScheme.outline,
-                    fontSize = 13.sp
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        product.condition,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontSize = 13.sp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    val quantity = formatCurrency(product.soldQuantity, "")
+                    Text(
+                        "| $quantity vendidos",
+                        color = MaterialTheme.colorScheme.outline,
+                        fontSize = 13.sp
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                RatingStars(
+                    rating = product.rating,
+                    reviews = product.reviews,
                 )
             }
 
@@ -282,7 +292,7 @@ fun ProductDetailScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    painter = painterResource(id = R.drawable.watch),
                     contentDescription = null,
                     tint = Color.Gray,
                     modifier = Modifier.size(32.dp)
