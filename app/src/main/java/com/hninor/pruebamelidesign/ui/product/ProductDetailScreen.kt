@@ -50,6 +50,7 @@ import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
 import com.hninor.pruebamelidesign.core.designsystem.component.PageIndicator
 import com.hninor.pruebamelidesign.core.designsystem.component.RatingStars
+import com.hninor.pruebamelidesign.core.designsystem.component.ToggleIconButton
 import com.hninor.pruebamelidesign.ui.home.formatCurrency
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -88,9 +89,11 @@ fun ProductDetailScreen(
 
 
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+    ) {
         HomeTopBar(
             isGrid = false,
             onToggleView = {},
@@ -190,17 +193,14 @@ fun ProductDetailScreen(
                     )
                 }
 
-                IconButton(
+                ToggleIconButton(
+                    isActive = isFavorite,
                     onClick = { isFavorite = !isFavorite },
+                    activeIcon = Icons.Filled.Favorite,
+                    contentDescription = "Favorito",
                     modifier = Modifier.align(Alignment.TopEnd)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Favorite,
-                        contentDescription = null,
-                        tint = if (isFavorite) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
+                )
+
             }
             // Puntos de carrusel
 

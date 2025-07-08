@@ -62,6 +62,7 @@ import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
 import com.hninor.pruebamelidesign.core.designsystem.component.MeliChip
 import com.hninor.pruebamelidesign.core.designsystem.component.RatingStars
+import com.hninor.pruebamelidesign.core.designsystem.component.ToggleIconButton
 import com.hninor.pruebamelidesign.core.designsystem.theme.MidGrayML
 import com.hninor.pruebamelidesign.domain.model.Product
 import java.text.NumberFormat
@@ -215,17 +216,13 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
                     .background(MaterialTheme.colorScheme.surface),
                 contentScale = ContentScale.Crop
             )
-            IconButton(
+            ToggleIconButton(
+                isActive = isFavorite,
                 onClick = { isFavorite = !isFavorite },
+                activeIcon = Icons.Filled.Favorite,
+                contentDescription = "Favorito",
                 modifier = Modifier.align(Alignment.TopEnd)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = null,
-                    tint = if (isFavorite) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+            )
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -386,17 +383,13 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
-            IconButton(
+            ToggleIconButton(
+                isActive = isFavorite,
                 onClick = { isFavorite = !isFavorite },
+                activeIcon = Icons.Filled.Favorite,
+                contentDescription = "Favorito",
                 modifier = Modifier.align(Alignment.TopEnd)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = null,
-                    tint = if (isFavorite) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+            )
         }
         Spacer(modifier = Modifier.height(6.dp))
 
