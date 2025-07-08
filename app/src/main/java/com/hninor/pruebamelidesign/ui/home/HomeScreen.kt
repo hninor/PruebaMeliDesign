@@ -58,6 +58,10 @@ import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
+import com.hninor.pruebamelidesign.core.designsystem.component.MeliChip
+import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Verified
 import com.hninor.pruebamelidesign.domain.model.Product
 
 @Composable
@@ -133,6 +137,15 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
 @Composable
 fun FilterChips() {
     val scrollState = rememberScrollState()
+    var selectedChip by remember { mutableStateOf(0) }
+    val chips = listOf(
+        Triple("Llega mañana", Icons.Default.LocalShipping, true),
+        Triple("Mejor precio en cuotas", null, false),
+        Triple("Enviado por", null, false),
+        Triple("Disponible en 3 colores", null, false),
+        Triple("Apple Tienda Oficial", Icons.Default.Verified, false),
+        Triple("Envío gratis", Icons.Default.Star, false)
+    )
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,24 +154,14 @@ fun FilterChips() {
             .padding(vertical = 8.dp, horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Chip(text = "Llega mañana")
-        Chip(text = "Mejor precio en cuotas")
-        Chip(text = "Enviado por")
-        Chip(text = "Disponible en 3 colores")
-        Chip(text = "Apple Tienda Oficial")
-        Chip(text = "Envío gratis")
-    }
-}
-
-@Composable
-fun Chip(text: String) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xFFF0F0F0))
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Text(text = text, fontSize = 13.sp, color = Color.Black)
+        chips.forEachIndexed { index, (text, icon, _) ->
+            MeliChip(
+                text = text,
+                icon = icon,
+                checked = selectedChip == index,
+                onCheckedChange = { selectedChip = index }
+            )
+        }
     }
 }
 

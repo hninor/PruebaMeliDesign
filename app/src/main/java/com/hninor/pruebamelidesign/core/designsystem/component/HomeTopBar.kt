@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hninor.pruebamelidesign.core.designsystem.component.GridListToggleButtons
 
 @Composable
 fun HomeTopBar(
@@ -45,7 +46,7 @@ fun HomeTopBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+       ,
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (showBack && onBack != null) {
@@ -57,13 +58,14 @@ fun HomeTopBar(
                         modifier = Modifier.size(28.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
+
             }
             // Campo de búsqueda clickeable
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .height(44.dp)
+                    .padding(start = 16.dp)
                     .clip(RoundedCornerShape(24.dp))
                     .background(Color.White)
                     .clickable { onSearchClick(if (searchQuery.isNotBlank()) searchQuery else null) },
@@ -95,7 +97,7 @@ fun HomeTopBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+  ,
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = { /* Acción al hacer clic */ }) {
@@ -107,7 +109,7 @@ fun HomeTopBar(
                 )
             }
 
-            Spacer(modifier = Modifier.width(4.dp))
+
             Text(
                 text = address,
                 color = Color.Black,
@@ -117,27 +119,15 @@ fun HomeTopBar(
                 imageVector = Icons.Default.ChevronRight,
                 contentDescription = "Cambiar dirección",
                 tint = Color.Black,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.weight(1f))
             if (showActions) {
                 // Iconos de grilla y lista, separados
-                IconButton(onClick = { onToggleView(true) }) {
-                    Icon(
-                        imageVector = Icons.Default.ViewModule,
-                        contentDescription = "Ver como grilla",
-                        tint = if (!isGrid) Color.Black.copy(alpha = 0.4f) else Color.Black,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-                IconButton(onClick = { onToggleView(false) }) {
-                    Icon(
-                        imageVector = Icons.Default.List,
-                        contentDescription = "Ver como lista",
-                        tint = if (isGrid) Color.Black.copy(alpha = 0.4f) else Color.Black,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
+                GridListToggleButtons(
+                    isGrid = isGrid,
+                    onToggleView = onToggleView
+                )
             } else {
                 Spacer(modifier = Modifier.width(28.dp * 2).height(28.dp)) // Ocupa el espacio de los dos iconos
             }

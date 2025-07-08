@@ -20,6 +20,7 @@ fun MeliTheme(
         ThemeColor.BLUE -> lightColorScheme(
             primary = PrimaryYellow,
             secondary = PrimaryBlue,
+            secondaryContainer = SecondaryBlueContainer,
             onPrimary = OnPrimary,
             surface = Surface,
             onSurface = OnSurface,
@@ -35,6 +36,7 @@ fun MeliTheme(
         ThemeColor.ORANGE -> lightColorScheme(
             primary = PrimaryYellow,
             secondary = PrimaryOrange,
+            secondaryContainer = SecondaryOrangeContainer,
             onPrimary = OnPrimary,
             surface = Surface,
             onSurface = OnSurface,
@@ -50,6 +52,7 @@ fun MeliTheme(
         ThemeColor.VIOLET -> lightColorScheme(
             primary = PrimaryYellow,
             secondary = PrimaryViolet,
+            secondaryContainer = SecondaryVioletContainer,
             onPrimary = OnPrimary,
             surface = Surface,
             onSurface = OnSurface,
@@ -65,6 +68,7 @@ fun MeliTheme(
         ThemeColor.GREEN -> lightColorScheme(
             primary = PrimaryYellow,
             secondary = PrimaryGreen,
+            secondaryContainer = SecondaryGreenContainer,
             onPrimary = OnPrimary,
             surface = Surface,
             onSurface = OnSurface,
