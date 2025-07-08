@@ -18,7 +18,8 @@ fun MeliTheme(
     
     val colorScheme = when (currentTheme) {
         ThemeColor.BLUE -> lightColorScheme(
-            primary = PrimaryBlue,
+            primary = PrimaryYellow,
+            secondary = PrimaryBlue,
             onPrimary = OnPrimary,
             surface = Surface,
             onSurface = OnSurface,
@@ -32,7 +33,8 @@ fun MeliTheme(
             outlineVariant = OutlineVariant
         )
         ThemeColor.ORANGE -> lightColorScheme(
-            primary = PrimaryOrange,
+            primary = PrimaryYellow,
+            secondary = PrimaryOrange,
             onPrimary = OnPrimary,
             surface = Surface,
             onSurface = OnSurface,
@@ -46,7 +48,8 @@ fun MeliTheme(
             outlineVariant = OutlineVariant
         )
         ThemeColor.VIOLET -> lightColorScheme(
-            primary = PrimaryViolet,
+            primary = PrimaryYellow,
+            secondary = PrimaryViolet,
             onPrimary = OnPrimary,
             surface = Surface,
             onSurface = OnSurface,
@@ -60,7 +63,8 @@ fun MeliTheme(
             outlineVariant = OutlineVariant
         )
         ThemeColor.GREEN -> lightColorScheme(
-            primary = PrimaryGreen,
+            primary = PrimaryYellow,
+            secondary = PrimaryGreen,
             onPrimary = OnPrimary,
             surface = Surface,
             onSurface = OnSurface,

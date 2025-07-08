@@ -79,7 +79,7 @@ fun ProductDetailScreen(
     val pagerImages = product?.images ?: emptyList()
     val pagerState = rememberPagerState(pageCount = { pagerImages.size })
     val yellow = MaterialTheme.colorScheme.primary
-    val blue = MaterialTheme.colorScheme.primary
+    val blue = MaterialTheme.colorScheme.secondary
     val green = PriceColor
     val gray = MaterialTheme.colorScheme.onSurfaceVariant
     val lightGray = MaterialTheme.colorScheme.surfaceVariant

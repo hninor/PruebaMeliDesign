@@ -77,7 +77,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
     val primaryColor = MaterialTheme.colorScheme.primary
 
 
-    systemUiController.setStatusBarColor(primaryColor)
+    systemUiController.setStatusBarColor(MaterialTheme.colorScheme.primary)
 
 
     Column(modifier = Modifier
@@ -305,13 +305,13 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
                     "${product.price} ${product.currency}",
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.secondary
                 )
                 if (product.discount != null) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         product.discount,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.secondary,
                         fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -340,12 +340,12 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
                 Text("(${product.reviews})", fontSize = 12.sp, color = Color.Gray)
             }
             if (product.freeShipping) {
-                Text("Envío gratis", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
+                Text("Envío gratis", color = MaterialTheme.colorScheme.secondary, fontSize = 13.sp)
             }
             if (product.arrivesTomorrow) {
                 Text(
                     "Llega gratis mañana",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontSize = 13.sp
                 )
             }
@@ -434,13 +434,13 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
                 "${product.price} ${product.currency}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 17.sp,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.secondary
             )
             if (product.discount != null) {
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     product.discount,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.secondary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -471,7 +471,7 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
         if (product.freeShipping) {
             Text(
                 "Envío gratis",
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(top = 2.dp)
             )
@@ -479,7 +479,7 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
         if (product.arrivesTomorrow) {
             Text(
                 "Llega gratis mañana",
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.secondary,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(top = 2.dp)
             )

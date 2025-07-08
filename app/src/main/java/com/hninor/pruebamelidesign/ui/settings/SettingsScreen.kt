@@ -145,7 +145,7 @@ fun ThemeColorOption(
         modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer 
+            containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer 
             else MaterialTheme.colorScheme.surface
         )
     ) {
@@ -161,7 +161,7 @@ fun ThemeColorOption(
                     .background(color)
                     .border(
                         width = if (isSelected) 3.dp else 1.dp,
-                        color = if (isSelected) MaterialTheme.colorScheme.primary 
+                        color = if (isSelected) MaterialTheme.colorScheme.secondary 
                         else MaterialTheme.colorScheme.outline,
                         shape = CircleShape
                     )
@@ -185,7 +185,7 @@ fun ThemeColorOption(
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = "Seleccionado",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(24.dp)
                 )
             }
