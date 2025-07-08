@@ -48,6 +48,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
+import com.hninor.pruebamelidesign.core.designsystem.component.OfficialStoreBadge
 import com.hninor.pruebamelidesign.core.designsystem.component.PageIndicator
 import com.hninor.pruebamelidesign.core.designsystem.component.RatingStars
 import com.hninor.pruebamelidesign.core.designsystem.component.ToggleIconButton
@@ -147,17 +148,10 @@ fun ProductDetailScreen(
             )
 
             if (product.isOfficial) {
-                Text(
-                    text = "${product.brand.uppercase()} TIENDA OFICIAL",
-                    color = Color.White,
-                    fontSize = 11.sp,
-
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .background(Color.Black, RoundedCornerShape(3.dp))
-                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                OfficialStoreBadge(
+                    brand = product.brand,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
-
             }
 
             Box(

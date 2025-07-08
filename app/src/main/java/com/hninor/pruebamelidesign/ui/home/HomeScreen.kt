@@ -61,6 +61,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
 import com.hninor.pruebamelidesign.core.designsystem.component.MeliChip
+import com.hninor.pruebamelidesign.core.designsystem.component.OfficialStoreBadge
 import com.hninor.pruebamelidesign.core.designsystem.component.RatingStars
 import com.hninor.pruebamelidesign.core.designsystem.component.ToggleIconButton
 import com.hninor.pruebamelidesign.core.designsystem.theme.MidGrayML
@@ -234,15 +235,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
 @Composable
 fun ProductInfo(product: Product) {
     if (product.isOfficial) {
-        Text(
-            text = "${product.brand.uppercase()} TIENDA OFICIAL",
-            color = Color.White,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .background(Color.Black, RoundedCornerShape(3.dp))
-                .padding(horizontal = 6.dp, vertical = 2.dp)
-        )
+        OfficialStoreBadge(brand = product.brand)
         Spacer(modifier = Modifier.height(4.dp))
     }
     Text(
