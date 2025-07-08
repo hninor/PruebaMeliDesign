@@ -139,8 +139,7 @@ fun ProductDetailScreen(
 
             Text(
                 product.title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                fontSize = 18.sp,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
@@ -149,13 +148,13 @@ fun ProductDetailScreen(
                     text = "${product.brand.uppercase()} TIENDA OFICIAL",
                     color = Color.White,
                     fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
+
                     modifier = Modifier
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                         .background(Color.Black, RoundedCornerShape(3.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+
             }
 
             Box(
