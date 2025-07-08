@@ -59,6 +59,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.hninor.pruebamelidesign.R
+import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
 import com.hninor.pruebamelidesign.core.designsystem.component.PageIndicator
 import com.hninor.pruebamelidesign.core.designsystem.theme.PriceColor
 import com.hninor.pruebamelidesign.core.designsystem.theme.DiscountColor
@@ -104,61 +105,17 @@ fun ProductDetailScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        // Barra superior amarilla
-        Column(Modifier.background(yellow)) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp, bottom = 8.dp, start = 4.dp, end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Volver",
-                        tint = Color.Black
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(40.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Text(
-                        text = "Buscar en Mercado Libre",
-                        color = Color.Gray,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
-            }
-            // Dirección
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .background(yellow)
-                    .padding(horizontal = 8.dp, vertical = 2.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.LocationOn,
-                    contentDescription = "Ubicación",
-                    tint = Color.Black,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text("Calle Bauness 1825", fontSize = 15.sp, color = Color.Black)
-                Spacer(modifier = Modifier.width(2.dp))
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Cambiar dirección",
-                    tint = Color.Black,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-        }
+        HomeTopBar(
+            isGrid = false,
+            onToggleView = {},
+            searchQuery = "",
+            onSearchClick = {},
+            onSettingsClick = null,
+            address = "Calle Bauness 1825",
+            showBack = true,
+            onBack = { navController.navigateUp() },
+            showActions = false
+        )
         // Contenido scrollable
         Column(
             Modifier

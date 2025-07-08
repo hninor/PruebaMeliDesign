@@ -57,6 +57,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hninor.pruebamelidesign.R
+import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
 import com.hninor.pruebamelidesign.domain.model.Product
 
 @Composable
@@ -65,7 +66,6 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
     var searchQuery by remember { mutableStateOf("") }
     val systemUiController = rememberSystemUiController()
     val lifecycleOwner = LocalLifecycleOwner.current
-    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(navController) {
         navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("search_query")
@@ -74,41 +74,39 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
             }
     }
 
-    val primaryColor = MaterialTheme.colorScheme.primary
-
-
     systemUiController.setStatusBarColor(MaterialTheme.colorScheme.primary)
 
+    val onClearSearch: () -> Unit = {
+        searchQuery = ""
+        navController.currentBackStackEntry?.savedStateHandle?.remove<String>("search_query")
+    }
+    val onSettingsClick: () -> Unit = {
+        navController.navigate("settings") {
+            popUpTo("home")
+            launchSingleTop = true
+        }
+    }
+    val onToggleView: (Boolean) -> Unit = { isGrid = !isGrid }
 
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(MaterialTheme.colorScheme.primary)) {
-        TopBar(
+        .background(MaterialTheme.colorScheme.surface)) {
+        HomeTopBar(
             isGrid = isGrid,
-            onToggleView = { isGrid = !isGrid },
+            onToggleView = onToggleView,
             searchQuery = searchQuery,
             onSearchClick = { initialText ->
                 navController.navigate("search") {
                     popUpTo("home")
                     launchSingleTop = true
                     if (!initialText.isNullOrBlank()) {
-                        navController.currentBackStackEntry?.savedStateHandle?.set(
-                            "search_query",
-                            initialText
-                        )
+                        navController.currentBackStackEntry?.savedStateHandle?.set("search_query", initialText)
                     }
                 }
             },
-            onClearSearch = {
-                searchQuery = ""
-                navController.currentBackStackEntry?.savedStateHandle?.remove<String>("search_query")
-            },
-            onSettingsClick = {
-                navController.navigate("settings") {
-                    popUpTo("home")
-                    launchSingleTop = true
-                }
-            }
+            onSettingsClick = onSettingsClick,
+            showBack = searchQuery.isNotBlank(),
+            onBack = if (searchQuery.isNotBlank()) onClearSearch else null
         )
         FilterChips()
         val filteredProducts = viewModel.filterProducts(searchQuery)
@@ -128,91 +126,6 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                     }
                 })
             }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBar(
-    isGrid: Boolean,
-    onToggleView: (Boolean) -> Unit,
-    searchQuery: String,
-    onSearchClick: (String?) -> Unit,
-    onClearSearch: () -> Unit = {},
-    onSettingsClick: (() -> Unit)? = null
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (searchQuery.isNotBlank()) {
-            IconButton(onClick = { onClearSearch() }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Limpiar búsqueda",
-                    tint = Color.Black
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 4.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color.White)
-                .clickable {
-                    onSearchClick(if (searchQuery.isNotBlank()) searchQuery else null)
-                },
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(
-                text = if (searchQuery.isBlank()) "Buscar..." else searchQuery,
-                color = if (searchQuery.isBlank()) Color.Gray else Color.Black,
-                fontSize = 16.sp,
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
-            )
-        }
-        Spacer(modifier = Modifier.width(8.dp))
-        Icon(
-            imageVector = Icons.Default.Settings,
-            contentDescription = "Configuración",
-            tint = Color.Black,
-            modifier = Modifier
-                .size(28.dp)
-                .clickable { onSettingsClick?.invoke() }
-        )
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(horizontal = 8.dp, vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.LocationOn,
-            contentDescription = "Ubicación",
-            tint = Color.Black,
-            modifier = Modifier.size(20.dp)
-        )
-        Text(
-            text = "Enviar a tu domicilio",
-            color = Color.Black,
-            fontSize = 14.sp,
-            modifier = Modifier.padding(start = 4.dp)
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = { onToggleView(!isGrid) }) {
-            Icon(
-                imageVector = if (isGrid) Icons.Default.List else Icons.Default.ViewModule,
-                contentDescription = if (isGrid) "Ver como lista" else "Ver como grilla",
-                tint = Color.Black
-            )
         }
     }
 }
