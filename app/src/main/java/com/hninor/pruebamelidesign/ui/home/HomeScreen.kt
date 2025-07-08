@@ -281,6 +281,7 @@ fun ProductInfo(product: Product) {
         reviews = product.reviews,
         modifier = Modifier.padding(top = 2.dp)
     )
+    Spacer(modifier = Modifier.height(8.dp))
 
     Row {
         Column {

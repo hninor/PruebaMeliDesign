@@ -22,8 +22,8 @@ fun PageIndicator(
     pageCount: Int,
     currentPage: Int,
     modifier: Modifier = Modifier,
-    activeColor: Color = MaterialTheme.colorScheme.primary,
-    inactiveColor: Color = MaterialTheme.colorScheme.surfaceVariant,
+    activeColor: Color = MaterialTheme.colorScheme.secondary,
+    inactiveColor: Color = MaterialTheme.colorScheme.outline,
     indicatorSize: Int = 8,
     spacing: Int = 8
 ) {

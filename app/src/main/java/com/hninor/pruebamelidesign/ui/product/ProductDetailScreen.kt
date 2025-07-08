@@ -1,10 +1,7 @@
 package com.hninor.pruebamelidesign.ui.product
 
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,69 +18,52 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
 import com.hninor.pruebamelidesign.core.designsystem.component.PageIndicator
-import com.hninor.pruebamelidesign.core.designsystem.theme.PriceColor
-import com.hninor.pruebamelidesign.core.designsystem.theme.DiscountColor
-import com.hninor.pruebamelidesign.core.designsystem.theme.RatingColor
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import com.hninor.pruebamelidesign.ui.home.formatCurrency
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ProductDetailScreen(
     navController: NavController,
-    productId: String? = null,
     viewModel: ProductDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val product = uiState.product
     val pagerImages = product?.images ?: emptyList()
     val pagerState = rememberPagerState(pageCount = { pagerImages.size })
-    val yellow = MaterialTheme.colorScheme.primary
-    val blue = MaterialTheme.colorScheme.secondary
-    val green = PriceColor
-    val gray = MaterialTheme.colorScheme.onSurfaceVariant
-    val lightGray = MaterialTheme.colorScheme.surfaceVariant
+    var isFavorite by remember { mutableStateOf(false) }
+
+    val gray = MaterialTheme.colorScheme.outline
+
 
     if (uiState.isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -104,7 +84,11 @@ fun ProductDetailScreen(
         return
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background)) {
         HomeTopBar(
             isGrid = false,
             onToggleView = {},
@@ -116,43 +100,54 @@ fun ProductDetailScreen(
             onBack = { navController.navigateUp() },
             showActions = false
         )
-        // Contenido scrollable
+
         Column(
             Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // Estado, vendidos
+
+
             Row(
                 Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(product.condition, color = green, fontSize = 13.sp)
+                Text(
+                    product.condition,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontSize = 13.sp
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("| ${product.soldQuantity} vendidos", color = gray, fontSize = 13.sp)
+                val quantity = formatCurrency(product.soldQuantity, "")
+                Text(
+                    "| $quantity vendidos",
+                    color = MaterialTheme.colorScheme.outline,
+                    fontSize = 13.sp
+                )
             }
-            // Título
+
             Text(
                 product.title,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            // Etiqueta tienda oficial
+
             if (product.isOfficial) {
                 Text(
-                    text = "APPLE TIENDA OFICIAL",
-                    color = Color.Black,
-                    fontSize = 12.sp,
+                    text = "${product.brand.uppercase()} TIENDA OFICIAL",
+                    color = Color.White,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .background(lightGray, RoundedCornerShape(4.dp))
+                        .padding(horizontal = 16.dp)
+                        .background(Color.Black, RoundedCornerShape(3.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 )
+                Spacer(modifier = Modifier.height(4.dp))
             }
-            // Carrusel de imágenes
+
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -167,10 +162,10 @@ fun ProductDetailScreen(
                         model = pagerImages[page],
                         contentDescription = product.title + ", imagen ${page + 1} de ${pagerImages.size}",
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Fit
+                        contentScale = ContentScale.Crop
                     )
                 }
-                // Indicador de página
+
                 Row(
                     Modifier
                         .align(Alignment.TopStart)
@@ -179,57 +174,59 @@ fun ProductDetailScreen(
                         .padding(horizontal = 8.dp, vertical = 2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("${pagerState.currentPage + 1}/${pagerImages.size}", fontSize = 12.sp, color = gray)
+                    Text(
+                        "${pagerState.currentPage + 1}/${pagerImages.size}",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.outline
+                    )
                 }
-                // Corazón favorito
+
                 IconButton(
-                    onClick = {},
-                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)
+                    onClick = { isFavorite = !isFavorite },
+                    modifier = Modifier.align(Alignment.TopEnd)
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.FavoriteBorder,
+                        imageVector = Icons.Filled.Favorite,
                         contentDescription = null,
-                        tint = Color.Gray,
+                        tint = if (isFavorite) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline,
                         modifier = Modifier.size(28.dp)
                     )
                 }
             }
             // Puntos de carrusel
-            Row(
-                Modifier.align(Alignment.CenterHorizontally).padding(bottom = 8.dp)
-                    .semantics {
-                        this.contentDescription = "Página ${pagerState.currentPage + 1} de ${pagerImages.size}"
-                    }
-            ) {
-                repeat(pagerImages.size) { idx ->
-                    Box(
-                        Modifier
-                            .size(if (pagerState.currentPage == idx) 10.dp else 8.dp)
-                            .background(
-                                if (pagerState.currentPage == idx) blue else lightGray,
-                                RoundedCornerShape(50)
-                            )
-                            .padding(2.dp)
-                    )
-                    if (idx < pagerImages.size - 1) Spacer(modifier = Modifier.width(4.dp))
-                }
-            }
-            // Precio y cuotas
+
+            PageIndicator(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 8.dp),
+                pageCount = product.images.size,
+                currentPage = pagerState.currentPage
+            )
+
+
             Row(
                 Modifier.padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.Bottom
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("${product.price} ${product.currency}", fontWeight = FontWeight.Bold, fontSize = 32.sp, color = blue)
-            }
-            if (product.originalPrice != null) {
                 Text(
-                    "${product.originalPrice} ${product.currency}",
-                    color = gray,
-                    fontSize = 15.sp,
-                    textDecoration = TextDecoration.LineThrough,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    text = formatCurrency(product.price),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 32.sp,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
+
+                if (product.discount != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = product.discount,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontSize = 13.sp,
+
+                        )
+                }
+
             }
+
             Text(
                 "Mismo precio en 9 cuotas de $ 127.999",
                 color = gray,
@@ -238,7 +235,7 @@ fun ProductDetailScreen(
             )
             Text(
                 "Envío gratis el sábado",
-                color = green,
+                color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 15.sp,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
             )
@@ -262,7 +259,7 @@ fun ProductDetailScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
                     .height(48.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = blue)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
             ) {
                 Text("Comprar ahora", color = Color.White, fontSize = 18.sp)
             }
@@ -273,7 +270,11 @@ fun ProductDetailScreen(
                     .padding(horizontal = 16.dp, vertical = 4.dp)
                     .height(48.dp)
             ) {
-                Text("Agregar al carrito", color = blue, fontSize = 18.sp)
+                Text(
+                    "Agregar al carrito",
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 18.sp
+                )
             }
             // Vendedor
             Row(
@@ -310,166 +311,5 @@ fun ProductDetailScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun ProductDetailContent(
-    product: com.hninor.pruebamelidesign.domain.model.Product,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
-        // Pager de imágenes
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-        ) {
-            val pagerState = rememberPagerState(pageCount = { product.images.size })
-            
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize()
-            ) { page ->
-                AsyncImage(
-                    model = product.images[page],
-                    contentDescription = "${product.title} - Imagen ${page + 1}",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
-            }
-            
-            // Page Indicator
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
-            ) {
-                PageIndicator(
-                    pageCount = product.images.size,
-                    currentPage = pagerState.currentPage
-                )
-            }
-        }
-        
-        // Información del producto
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = product.title,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Precio
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "$${product.price}",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = PriceColor,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                product.originalPrice?.let { originalPrice ->
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Text(
-                        text = "$${originalPrice}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = DiscountColor
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Información del vendedor
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Vendedor",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = product.seller.name,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        
-                        Spacer(modifier = Modifier.size(8.dp))
-                        
-                        Text(
-                            text = "★ ${product.seller.reputation}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = RatingColor
-                        )
-                    }
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Detalles del producto
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Detalles",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    DetailRow("Condición", product.condition)
-                    DetailRow("Disponibles", "${product.availableQuantity} unidades")
-                    DetailRow("Vendidos", "${product.soldQuantity} unidades")
-                }
-            }
-        }
-    }
-}
 
-@Composable
-fun DetailRow(
-    label: String,
-    value: String
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
-} 
+
