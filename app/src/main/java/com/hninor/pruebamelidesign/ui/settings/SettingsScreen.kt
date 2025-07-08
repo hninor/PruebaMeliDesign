@@ -34,6 +34,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -140,7 +142,7 @@ fun ThemeColorOption(
 ) {
     Card(
         onClick = onSelect,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().semantics(mergeDescendants = true) {},
         elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 2.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer 
@@ -163,6 +165,9 @@ fun ThemeColorOption(
                         else MaterialTheme.colorScheme.outline,
                         shape = CircleShape
                     )
+                    .semantics {
+                        contentDescription = if (isSelected) "Color $displayName seleccionado" else "Color $displayName"
+                    }
             )
             
             Spacer(modifier = Modifier.size(16.dp))

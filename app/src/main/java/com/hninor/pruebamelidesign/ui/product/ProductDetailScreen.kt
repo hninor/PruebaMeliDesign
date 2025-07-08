@@ -64,6 +64,8 @@ import com.hninor.pruebamelidesign.core.designsystem.theme.PriceColor
 import com.hninor.pruebamelidesign.core.designsystem.theme.DiscountColor
 import com.hninor.pruebamelidesign.core.designsystem.theme.RatingColor
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -76,11 +78,11 @@ fun ProductDetailScreen(
     val product = uiState.product
     val pagerImages = product?.images ?: emptyList()
     val pagerState = rememberPagerState(pageCount = { pagerImages.size })
-    val yellow = Color(0xFFFFE600)
-    val blue = Color(0xFF23238E)
-    val green = Color(0xFF00A650)
-    val gray = Color(0xFF666666)
-    val lightGray = Color(0xFFF0F0F0)
+    val yellow = MaterialTheme.colorScheme.primary
+    val blue = MaterialTheme.colorScheme.primary
+    val green = PriceColor
+    val gray = MaterialTheme.colorScheme.onSurfaceVariant
+    val lightGray = MaterialTheme.colorScheme.surfaceVariant
 
     if (uiState.isLoading) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -101,7 +103,7 @@ fun ProductDetailScreen(
         return
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         // Barra superior amarilla
         Column(Modifier.background(yellow)) {
             Row(
@@ -162,7 +164,7 @@ fun ProductDetailScreen(
             Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             // Estado, vendidos
             Row(
@@ -206,7 +208,7 @@ fun ProductDetailScreen(
                 ) { page ->
                     AsyncImage(
                         model = pagerImages[page],
-                        contentDescription = null,
+                        contentDescription = product.title + ", imagen ${page + 1} de ${pagerImages.size}",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Fit
                     )
@@ -229,7 +231,7 @@ fun ProductDetailScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.FavoriteBorder,
-                        contentDescription = "Favorito",
+                        contentDescription = null,
                         tint = Color.Gray,
                         modifier = Modifier.size(28.dp)
                     )
@@ -238,6 +240,9 @@ fun ProductDetailScreen(
             // Puntos de carrusel
             Row(
                 Modifier.align(Alignment.CenterHorizontally).padding(bottom = 8.dp)
+                    .semantics {
+                        this.contentDescription = "Página ${pagerState.currentPage + 1} de ${pagerImages.size}"
+                    }
             ) {
                 repeat(pagerImages.size) { idx ->
                     Box(

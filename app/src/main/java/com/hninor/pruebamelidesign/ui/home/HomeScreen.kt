@@ -1,14 +1,42 @@
 package com.hninor.pruebamelidesign.ui.home
 
-import androidx.compose.foundation.Image
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ViewModule
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,38 +45,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hninor.pruebamelidesign.R
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ViewModule
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.TextStyle
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import androidx.compose.runtime.SideEffect
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.navigation.NavController
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.domain.model.Product
 
 @Composable
@@ -60,16 +68,21 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(navController) {
-        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("search_query")?.observe(lifecycleOwner) { query ->
-            searchQuery = query ?: ""
-        }
+        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("search_query")
+            ?.observe(lifecycleOwner) { query ->
+                searchQuery = query ?: ""
+            }
     }
 
-    SideEffect {
-        systemUiController.setStatusBarColor(Color(0xFFFFE600))
-    }
-    
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFFFE600))) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+
+
+    systemUiController.setStatusBarColor(primaryColor)
+
+
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.primary)) {
         TopBar(
             isGrid = isGrid,
             onToggleView = { isGrid = !isGrid },
@@ -79,7 +92,10 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
                     popUpTo("home")
                     launchSingleTop = true
                     if (!initialText.isNullOrBlank()) {
-                        navController.currentBackStackEntry?.savedStateHandle?.set("search_query", initialText)
+                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                            "search_query",
+                            initialText
+                        )
                     }
                 }
             },
@@ -129,7 +145,7 @@ fun TopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFFFE600))
+            .background(MaterialTheme.colorScheme.primary)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -174,7 +190,7 @@ fun TopBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color(0xFFFFE600))
+            .background(MaterialTheme.colorScheme.primary)
             .padding(horizontal = 8.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -255,7 +271,8 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
             .padding(12.dp)
             .background(Color.White, RoundedCornerShape(12.dp))
             .padding(8.dp)
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .semantics(mergeDescendants = true) {},
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
@@ -273,16 +290,31 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
                     color = Color.Black,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.background(Color(0xFFE0E0E0), RoundedCornerShape(4.dp)).padding(2.dp)
+                    modifier = Modifier
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            RoundedCornerShape(4.dp)
+                        )
+                        .padding(2.dp)
                 )
             }
             Text(product.brand, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             Text(product.title, fontSize = 14.sp, maxLines = 2)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("${product.price} ${product.currency}", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF23238E))
+                Text(
+                    "${product.price} ${product.currency}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.primary
+                )
                 if (product.discount != null) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(product.discount, color = Color(0xFF00A650), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        product.discount,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
             if (product.originalPrice != null) {
@@ -308,17 +340,21 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
                 Text("(${product.reviews})", fontSize = 12.sp, color = Color.Gray)
             }
             if (product.freeShipping) {
-                Text("Envío gratis", color = Color(0xFF00A650), fontSize = 13.sp)
+                Text("Envío gratis", color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
             }
             if (product.arrivesTomorrow) {
-                Text("Llega gratis mañana", color = Color(0xFF00A650), fontSize = 13.sp)
+                Text(
+                    "Llega gratis mañana",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 13.sp
+                )
             }
             Text("Disponible en ${product.colors} colores", fontSize = 12.sp, color = Color.Gray)
         }
         // Corazón favorito (decorativo)
         Icon(
             painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = "Favorito",
+            contentDescription = null,
             tint = Color.Gray,
             modifier = Modifier.size(24.dp)
         )
@@ -379,10 +415,18 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
                 color = Color.Black,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.background(Color(0xFFE0E0E0), RoundedCornerShape(4.dp)).padding(2.dp)
+                modifier = Modifier
+                    .background(Color(0xFFE0E0E0), RoundedCornerShape(4.dp))
+                    .padding(2.dp)
             )
         }
-        Text(product.brand, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = Color.Gray, maxLines = 1)
+        Text(
+            product.brand,
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            color = Color.Gray,
+            maxLines = 1
+        )
         Text(product.title, fontWeight = FontWeight.Normal, fontSize = 13.sp, maxLines = 2)
         Spacer(modifier = Modifier.height(2.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -390,13 +434,13 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
                 "${product.price} ${product.currency}",
                 fontWeight = FontWeight.Bold,
                 fontSize = 17.sp,
-                color = Color(0xFF23238E)
+                color = MaterialTheme.colorScheme.primary
             )
             if (product.discount != null) {
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     product.discount,
-                    color = Color(0xFF00A650),
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -427,7 +471,7 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
         if (product.freeShipping) {
             Text(
                 "Envío gratis",
-                color = Color(0xFF00A650),
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(top = 2.dp)
             )
@@ -435,7 +479,7 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
         if (product.arrivesTomorrow) {
             Text(
                 "Llega gratis mañana",
-                color = Color(0xFF00A650),
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 13.sp,
                 modifier = Modifier.padding(top = 2.dp)
             )

@@ -70,6 +70,7 @@ import com.hninor.pruebamelidesign.core.designsystem.theme.DiscountColor
 import com.hninor.pruebamelidesign.domain.model.Product
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.semantics.semantics
 
 val defaultSuggestions = listOf(
     "iphone", "samsung", "notebook", "auriculares", "playstation", "xiaomi", "monitor", "teclado", "mouse", "impresora"
@@ -199,7 +200,7 @@ fun SearchScreen(
                         )
                     }
                 }
-                Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
+                Divider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -228,7 +229,7 @@ fun SearchScreen(
                                 onClick = { triggerSearch(product.title) },
                                 onIconRightClick = { searchQuery = TextFieldValue(product.title, TextRange(product.title.length)) }
                             )
-                            Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
+                            Divider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                         }
                     }
                     // Sugerencias por defecto o búsquedas recientes
@@ -242,7 +243,7 @@ fun SearchScreen(
                                 onClick = { triggerSearch(suggestion) },
                                 onIconRightClick = { searchQuery = TextFieldValue(suggestion, TextRange(suggestion.length)) }
                             )
-                            Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
+                            Divider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                         }
                     }
                 }
@@ -264,7 +265,8 @@ fun SuggestionRow(
             .fillMaxWidth()
             .background(Color.White)
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .semantics(mergeDescendants = true) {},
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (iconLeft != null) {
@@ -293,7 +295,7 @@ fun SuggestionRow(
             ) {
                 Icon(
                     imageVector = iconRight,
-                    contentDescription = "Sugerir texto",
+                    contentDescription = null,
                     tint = Color.Gray
                 )
             }
@@ -313,7 +315,7 @@ fun SearchResultCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(12.dp).semantics(mergeDescendants = true) {},
             verticalAlignment = Alignment.Top
         ) {
             // Imagen del producto
