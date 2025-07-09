@@ -26,6 +26,7 @@ fun OfficialStoreBadge(
         color = textColor,
         fontSize = fontSize.sp,
         fontWeight = fontWeight,
+        maxLines = 1,
         modifier = modifier
             .background(backgroundColor, RoundedCornerShape(3.dp))
             .padding(horizontal = 6.dp, vertical = 2.dp)

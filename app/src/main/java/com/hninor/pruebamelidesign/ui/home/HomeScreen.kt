@@ -11,7 +11,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -33,7 +32,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -55,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -71,9 +70,9 @@ import com.hninor.pruebamelidesign.core.designsystem.component.OfficialStoreBadg
 import com.hninor.pruebamelidesign.core.designsystem.component.RatingStars
 import com.hninor.pruebamelidesign.core.designsystem.component.ToggleIconButton
 import com.hninor.pruebamelidesign.domain.model.Product
+import java.nio.file.WatchEvent
 import java.text.NumberFormat
 import java.util.Locale
-import androidx.compose.ui.graphics.graphicsLayer
 
 fun formatCurrency(value: Number, currency: String = "$ "): String {
     val format = NumberFormat.getNumberInstance(Locale("es", "CO"))
@@ -147,7 +146,7 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
         )
         FilterChips()
         val filteredProducts = viewModel.filterProducts(searchQuery)
-        
+
         AnimatedContent(
             targetState = isGrid,
             transitionSpec = {
@@ -204,7 +203,7 @@ fun FilterChips() {
         Triple("Apple Tienda Oficial", Icons.Default.Verified, false),
         Triple("Envío gratis", Icons.Default.Star, false)
     )
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -218,7 +217,7 @@ fun FilterChips() {
             LaunchedEffect(Unit) {
                 kotlinx.coroutines.delay(delay)
             }
-            
+
             MeliChip(
                 text = text,
                 icon = icon,
@@ -250,7 +249,7 @@ fun ProductList(products: List<Product>, onProductClick: (Product) -> Unit) {
 fun ProductCard(product: Product, onClick: () -> Unit) {
     var isFavorite by remember { mutableStateOf(false) }
     var isPressed by remember { mutableStateOf(false) }
-    
+
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.95f else 1f,
         animationSpec = spring(
@@ -259,12 +258,12 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
         ),
         label = "scale"
     )
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
-            .clickable { 
+            .clickable {
                 isPressed = true
                 onClick()
             }
@@ -340,23 +339,21 @@ fun ProductInfo(product: Product) {
     )
     Spacer(modifier = Modifier.height(8.dp))
 
-    Row {
-        Column {
-            if (product.originalPrice != null) {
-                Text(
-                    text = formatCurrency(product.originalPrice),
-                    color = MaterialTheme.colorScheme.outline,
-                    fontSize = 13.sp,
-                    textDecoration = TextDecoration.LineThrough
-                )
-            }
+    Row(
+
+        verticalAlignment = Alignment.CenterVertically,
+
+    ) {
+        if (product.originalPrice != null) {
             Text(
-                text = formatCurrency(product.price),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                text = formatCurrency(product.originalPrice),
+                color = MaterialTheme.colorScheme.outline,
+                fontSize = 13.sp,
+                textDecoration = TextDecoration.LineThrough
             )
         }
+
+        Spacer(modifier = Modifier.width(4.dp))
 
         if (product.discount != null) {
             Spacer(modifier = Modifier.width(8.dp))
@@ -364,10 +361,19 @@ fun ProductInfo(product: Product) {
                 text = product.discount,
                 color = MaterialTheme.colorScheme.tertiary,
                 fontSize = 13.sp,
-
-                )
+            )
         }
+
     }
+
+
+    Text(
+        text = formatCurrency(product.price),
+        color = MaterialTheme.colorScheme.onSurface,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp
+    )
+
 
 
 
@@ -429,7 +435,7 @@ fun ProductGrid(products: List<Product>, onProductClick: (Product) -> Unit) {
 fun ProductGridCard(product: Product, onClick: () -> Unit) {
     var isFavorite by remember { mutableStateOf(false) }
     var isPressed by remember { mutableStateOf(false) }
-    
+
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.95f else 1f,
         animationSpec = spring(
@@ -438,14 +444,14 @@ fun ProductGridCard(product: Product, onClick: () -> Unit) {
         ),
         label = "scale"
     )
-    
+
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(6.dp)
-            .clickable { 
+            .clickable {
                 isPressed = true
                 onClick()
             }
