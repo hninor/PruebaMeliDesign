@@ -137,7 +137,7 @@ fun SearchScreen(
                 Row(
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 8.dp, start = 4.dp, end = 8.dp),
+                        .padding(top = 8.dp, start = 4.dp, end = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = {
@@ -200,7 +200,7 @@ fun SearchScreen(
                         )
                     }
                 }
-                Divider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
+                Divider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 2.dp)
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }

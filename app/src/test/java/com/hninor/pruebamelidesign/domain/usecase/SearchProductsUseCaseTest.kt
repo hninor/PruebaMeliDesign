@@ -6,11 +6,11 @@ import com.hninor.pruebamelidesign.domain.model.Seller
 import com.hninor.pruebamelidesign.domain.repository.ProductRepository
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import kotlin.test.assertEquals
 
 class SearchProductsUseCaseTest {
     
@@ -24,7 +24,7 @@ class SearchProductsUseCaseTest {
     }
     
     @Test
-    fun `when search products then return search result`() = runTest {
+    fun whenSearchProductsThenReturnSearchResult() = runTest {
         // Given
         val query = "iPhone"
         val mockProducts = listOf(
