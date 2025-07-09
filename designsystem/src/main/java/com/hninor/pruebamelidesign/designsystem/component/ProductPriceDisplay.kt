@@ -13,7 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hninor.pruebamelidesign.ui.home.formatCurrency
+import java.text.NumberFormat
+import java.util.Locale
+
+
+fun formatCurrency(value: Number, currency: String = "$ "): String {
+    val format = NumberFormat.getNumberInstance(Locale("es", "CO"))
+    return "$currency${format.format(value)}"
+}
 
 @Composable
 fun ProductPriceDisplay(

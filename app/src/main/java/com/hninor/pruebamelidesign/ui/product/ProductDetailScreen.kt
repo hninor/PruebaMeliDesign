@@ -41,11 +41,9 @@ import androidx.navigation.NavController
 import com.hninor.pruebamelidesign.R
 import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
 import com.hninor.pruebamelidesign.core.designsystem.component.OfficialStoreBadge
-import com.hninor.pruebamelidesign.core.designsystem.component.PageIndicator
 import com.hninor.pruebamelidesign.core.designsystem.component.ProductImageGallery
 import com.hninor.pruebamelidesign.core.designsystem.component.ProductPriceDisplay
 import com.hninor.pruebamelidesign.core.designsystem.component.RatingStars
-import com.hninor.pruebamelidesign.core.designsystem.component.ToggleIconButton
 import com.hninor.pruebamelidesign.ui.home.formatCurrency
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)

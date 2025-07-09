@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Prueba Meli Design"
 include(":app")
+include(":designsystem")
  

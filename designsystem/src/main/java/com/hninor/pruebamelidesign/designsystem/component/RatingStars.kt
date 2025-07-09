@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
-import com.hninor.pruebamelidesign.R
+import com.hninor.pruebamelidesign.designsystem.R
 
 @Composable
 fun RatingStars(
