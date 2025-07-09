@@ -1,6 +1,6 @@
 # Mercado Libre Clone - Android App
 
-Una aplicación Android que replica la funcionalidad básica de Mercado Libre, desarrollada con Jetpack Compose y siguiendo las mejores prácticas de arquitectura limpia y modularización.
+Una aplicación Android que replica la funcionalidad básica de Mercado Libre, desarrollada con Jetpack Compose y siguiendo las mejores prácticas de arquitectura limpia y modularización. Se hace especial enfásis en el diseño con el objetivo de crear una librería de componentes reutilizables
 
 ## 🚀 Características
 
