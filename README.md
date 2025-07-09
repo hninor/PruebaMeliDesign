@@ -131,7 +131,6 @@ fun PageIndicatorTest()
 
 ### Utilidades
 - **Coil**: Carga de imágenes
-- **Paging**: Paginación de datos
 
 ## 📱 Pantallas
 
@@ -294,7 +293,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 👨‍💻 Autor
 
-**Tu Nombre** - [@tu-usuario](https://github.com/tu-usuario)
+**Henry Niño** - [hninor@gmail.com](https://github.com/tu-usuario)
 
 ---
 
