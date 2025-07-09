@@ -1,6 +1,17 @@
 package com.hninor.pruebamelidesign.ui.home
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -42,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -61,6 +73,7 @@ import com.hninor.pruebamelidesign.core.designsystem.component.ToggleIconButton
 import com.hninor.pruebamelidesign.domain.model.Product
 import java.text.NumberFormat
 import java.util.Locale
+import androidx.compose.ui.graphics.graphicsLayer
 
 fun formatCurrency(value: Number, currency: String = "$ "): String {
     val format = NumberFormat.getNumberInstance(Locale("es", "CO"))
@@ -71,8 +84,13 @@ fun formatCurrency(value: Number, currency: String = "$ "): String {
 fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltViewModel()) {
     var isGrid by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
+    var isScreenVisible by remember { mutableStateOf(false) }
     val systemUiController = rememberSystemUiController()
     val lifecycleOwner = LocalLifecycleOwner.current
+
+    LaunchedEffect(Unit) {
+        isScreenVisible = true
+    }
 
     LaunchedEffect(navController) {
         navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>("search_query")
@@ -95,10 +113,17 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
     }
     val onToggleView: (Boolean) -> Unit = { isGrid = !isGrid }
 
+    val alpha by animateFloatAsState(
+        targetValue = if (isScreenVisible) 1f else 0f,
+        animationSpec = tween(600, easing = EaseInOut),
+        label = "screen_alpha"
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
+            .graphicsLayer(alpha = alpha)
     ) {
         HomeTopBar(
             isGrid = isGrid,
@@ -122,7 +147,32 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel = hiltView
         )
         FilterChips()
         val filteredProducts = viewModel.filterProducts(searchQuery)
-        AnimatedContent(targetState = isGrid) { grid ->
+        
+        AnimatedContent(
+            targetState = isGrid,
+            transitionSpec = {
+                ContentTransform(
+                    targetContentEnter = slideInHorizontally(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        initialOffsetX = { if (targetState) it else -it }
+                    ) + fadeIn(
+                        animationSpec = tween(400, easing = EaseInOut)
+                    ),
+                    initialContentExit = slideOutHorizontally(
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        targetOffsetX = { if (targetState) -it else it }
+                    ) + fadeOut(
+                        animationSpec = tween(400, easing = EaseInOut)
+                    )
+                )
+            }
+        ) { grid ->
             if (grid) {
                 ProductGrid(products = filteredProducts, onProductClick = { product ->
                     navController.navigate("product/${product.id}") {
@@ -154,6 +204,7 @@ fun FilterChips() {
         Triple("Apple Tienda Oficial", Icons.Default.Verified, false),
         Triple("Envío gratis", Icons.Default.Star, false)
     )
+    
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -163,6 +214,11 @@ fun FilterChips() {
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         chips.forEachIndexed { index, (text, icon, _) ->
+            val delay = index * 100L
+            LaunchedEffect(Unit) {
+                kotlinx.coroutines.delay(delay)
+            }
+            
             MeliChip(
                 text = text,
                 icon = icon,
@@ -181,8 +237,11 @@ fun ProductList(products: List<Product>, onProductClick: (Product) -> Unit) {
             .background(Color.White)
             .padding(top = 4.dp)
     ) {
-        items(products) { product ->
-            ProductCard(product, onClick = { onProductClick(product) })
+        items(
+            count = products.size,
+            key = { index -> index }
+        ) { index ->
+            ProductCard(products[index], onClick = { onProductClick(products[index]) })
         }
     }
 }
@@ -190,11 +249,26 @@ fun ProductList(products: List<Product>, onProductClick: (Product) -> Unit) {
 @Composable
 fun ProductCard(product: Product, onClick: () -> Unit) {
     var isFavorite by remember { mutableStateOf(false) }
+    var isPressed by remember { mutableStateOf(false) }
+    
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+    
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
-            .clickable { onClick() }
+            .clickable { 
+                isPressed = true
+                onClick()
+            }
+            .scale(scale)
             .padding(vertical = 8.dp, horizontal = 12.dp)
             .height(IntrinsicSize.Min)
     ) {
@@ -342,8 +416,11 @@ fun ProductGrid(products: List<Product>, onProductClick: (Product) -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(products.size) { idx ->
-            ProductGridCard(products[idx], onClick = { onProductClick(products[idx]) })
+        items(
+            count = products.size,
+            key = { index -> index }
+        ) { index ->
+            ProductGridCard(products[index], onClick = { onProductClick(products[index]) })
         }
     }
 }
@@ -351,13 +428,28 @@ fun ProductGrid(products: List<Product>, onProductClick: (Product) -> Unit) {
 @Composable
 fun ProductGridCard(product: Product, onClick: () -> Unit) {
     var isFavorite by remember { mutableStateOf(false) }
+    var isPressed by remember { mutableStateOf(false) }
+    
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
+    
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background, RoundedCornerShape(12.dp))
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(6.dp)
-            .clickable { onClick() }
+            .clickable { 
+                isPressed = true
+                onClick()
+            }
+            .scale(scale)
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
             AsyncImage(
