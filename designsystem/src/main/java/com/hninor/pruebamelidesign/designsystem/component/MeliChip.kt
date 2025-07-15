@@ -1,9 +1,9 @@
-package com.hninor.pruebamelidesign.core.designsystem.component
+package com.hninor.pruebamelidesign.designsystem.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -14,8 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,36 +39,47 @@ fun MeliChip(
 
     Row(
         modifier = modifier
+            .semantics(mergeDescendants = true) {
+                contentDescription = text
+                stateDescription = if (checked) "Seleccionado" else "No seleccionado"
+                role = Role.Checkbox
+            }
+            .toggleable(
+                value = checked,
+                enabled = onCheckedChange != null,
+                onValueChange = { onCheckedChange?.invoke() }
+            )
             .clip(RoundedCornerShape(20.dp))
             .background(backgroundColor)
             .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(20.dp))
-            .then(if (onCheckedChange != null) Modifier.clickable { onCheckedChange() } else Modifier)
             .padding(horizontal = 12.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null) {
             Icon(
                 imageVector = icon,
-                contentDescription = null,
+                contentDescription = null, // decorativo
                 tint = iconTint,
                 modifier = Modifier.size(16.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
         }
+
         Text(
             text = text,
             fontSize = 13.sp,
             color = textColor,
             fontWeight = FontWeight.Normal
         )
+
         if (checked) {
             Spacer(modifier = Modifier.width(6.dp))
             Icon(
                 imageVector = Icons.Default.Check,
-                contentDescription = "Seleccionado",
+                contentDescription = null, // decorativo, ya se indica el estado arriba
                 tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.size(16.dp)
             )
         }
     }
-} 
+}

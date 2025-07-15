@@ -65,12 +65,11 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.hninor.pruebamelidesign.core.designsystem.component.HomeTopBar
-import com.hninor.pruebamelidesign.core.designsystem.component.MeliChip
+import com.hninor.pruebamelidesign.designsystem.component.MeliChip
 import com.hninor.pruebamelidesign.core.designsystem.component.OfficialStoreBadge
 import com.hninor.pruebamelidesign.core.designsystem.component.RatingStars
 import com.hninor.pruebamelidesign.core.designsystem.component.ToggleIconButton
 import com.hninor.pruebamelidesign.domain.model.Product
-import java.nio.file.WatchEvent
 import java.text.NumberFormat
 import java.util.Locale
 
